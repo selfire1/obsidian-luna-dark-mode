@@ -1,12 +1,31 @@
 import { App, Workspace, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+interface MyPluginSettings {
+	mySetting: string;
+}
 
-export default class SystemDarkMode extends Plugin {
+const DEFAULT_SETTINGS: MyPluginSettings = {
+	mySetting: 'default'
+}
 
+
+export default class MobileDarkModeHelper extends Plugin {
+  settings: MyPluginSettings;
   async onload() {
+    // Settings
+    await this.loadSettings();
+    this.addSettingTab(new SampleSettingTab(this.app, this));
+
 
     // Watch for system changes to color theme 
 
     let media = window.matchMedia('(prefers-color-scheme: dark)');
+    let startTime = '15:10';
+    let endTime = '22:30';
+
+    let currentDate = new Date()
+    let currentHours = currentDate.getHours()
+    let currentMinutes = currentDate.getMinutes()
+
 
     let callback = () => {
       if (media.matches) {
@@ -26,6 +45,14 @@ export default class SystemDarkMode extends Plugin {
     
     callback();
   }
+
+  async loadSettings() {
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+	}
+
+	async saveSettings() {
+		await this.saveData(this.settings);
+	}
 
   onunload() {
     console.log('System color scheme checking is turned off');
@@ -61,3 +88,31 @@ export default class SystemDarkMode extends Plugin {
   }
 
 }
+
+class SampleSettingTab extends PluginSettingTab {
+	plugin: MobileDarkModeHelper;
+
+	constructor(app: App, plugin: MobileDarkModeHelper) {
+		super(app, plugin);
+		this.plugin = plugin;
+	}
+
+	display(): void {
+		let {containerEl} = this;
+
+		containerEl.empty();
+
+		containerEl.createEl('h2', {text: 'Settings for my awesome plugin.'});
+
+		new Setting(containerEl)
+			.setName('Setting #1')
+			.setDesc('It\'s a secret')
+			.addText(text => text
+				.setPlaceholder('Enter your secret')
+				.setValue(this.plugin.settings.mySetting)
+				.onChange(async (value) => {
+					console.log('Secret: ' + value);
+					this.plugin.settings.mySetting = value;
+					await this.plugin.saveSettings();
+				}));
+      }}
