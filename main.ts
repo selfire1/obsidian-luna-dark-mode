@@ -36,34 +36,36 @@ export default class Luna extends Plugin {
     // ---------------------
     // MANUAL MODE
     // ---------------------
-    // Initial time check
-    this.checkTime();
-    // Watch for time changes (every minute)
-    var timeChecker = setInterval(() => this.checkTime(), 60000);
+    if (this.settings.mode === "manual") {
+      // Initial time check
+      this.checkTime();
+      // Watch for time changes (every minute)
+      var timeChecker = setInterval(() => this.checkTime(), 60000);
 
-    // Remove interval when we unload
-    this.register(() => clearInterval(timeChecker));
+      // Remove interval when we unload
+      this.register(() => clearInterval(timeChecker));
 
-    // ---------------------
-    // SYSTEM MODE
-    // ---------------------
+      // ---------------------
+      // SYSTEM MODE
+      // ---------------------
+    } else if (this.settings.mode === "system") {
 
-    // Watch for system changes to color theme
-    let media = window.matchMedia("(prefers-color-scheme: dark)");
+      // Watch for system changes to color theme
+      let media = window.matchMedia("(prefers-color-scheme: dark)");
 
-    let callback = () => {
-      if (media.matches) {
-        this.updateDarkStyle();
-      } else {
-        this.updateLightStyle();
-      }
-    };
-    media.addEventListener("change", callback);
+      let callback = () => {
+        if (media.matches) {
+          this.updateDarkStyle();
+        } else {
+          this.updateLightStyle();
+        }
+      };
+      media.addEventListener("change", callback);
 
-    // Remove listener when we unload
-    this.register(() => media.removeEventListener("change", callback));
-
-    callback();
+      // Remove listener when we unload
+      this.register(() => media.removeEventListener("change", callback));
+      callback();
+    }
   }
 
   async loadSettings() {
@@ -90,8 +92,10 @@ export default class Luna extends Plugin {
       (currentHours >= startHours && currentMinutes > startMinutes) ||
       (currentHours <= endHours && currentMinutes < endMinutes)
     ) {
+      console.log("Dark mode active");
       this.updateDarkStyle();
     } else {
+      console.log("Light mode active");
       this.updateLightStyle();
     }
   }
