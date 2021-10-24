@@ -33,13 +33,19 @@ export default class Luna extends Plugin {
     await this.loadSettings();
     this.addSettingTab(new SampleSettingTab(this.app, this));
 
-    // Load times
-    let startTime = "15:10";
-    let endTime = "22:30";
-    let currentDate = new Date();
-    let currentHours = currentDate.getHours();
-    let currentMinutes = currentDate.getMinutes();
-    
+    // ---------------------
+    // MANUAL MODE
+    // ---------------------
+    // Watch for time changes (every minute)
+    var timeChecker = setInterval(this.checkTime, 60000);
+
+    // Remove interval when we unload
+    this.register(() => clearInterval(timeChecker));
+
+    // ---------------------
+    // SYSTEM MODE
+    // ---------------------
+
     // Watch for system changes to color theme
     let media = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -55,7 +61,6 @@ export default class Luna extends Plugin {
     media.addEventListener("change", callback);
 
     // Remove listener when we unload
-
     this.register(() => media.removeEventListener("change", callback));
 
     callback();
@@ -67,6 +72,27 @@ export default class Luna extends Plugin {
 
   async saveSettings() {
     await this.saveData(this.settings);
+  }
+
+  checkTime() {
+    // Load times
+    let startHours = this.settings.startHours;
+    let startMinutes = this.settings.startMinutes;
+    let endHours = this.settings.endHours;
+    let endMinutes = this.settings.endMinutes;
+    let currentDate = new Date();
+    let currentHours = currentDate.getHours();
+    let currentMinutes = currentDate.getMinutes();
+
+    if (
+      (currentHours >= startHours && currentMinutes > startMinutes) ||
+      (currentHours <= endHours && currentMinutes < endMinutes)
+    ) {
+      this.updateDarkStyle();
+    } else {
+      this.updateLightStyle();
+    }
+
   }
 
   onunload() {
@@ -147,7 +173,7 @@ class SampleSettingTab extends PluginSettingTab {
       .addSlider((text) =>
         text
           .setValue(this.plugin.settings.startMinutes)
-          .setLimits(0, 59, 15)
+          .setLimits(0, 59, 5)
           .onChange(async (value) => {
             if (value < 10) {
               startMins.setDesc(`Starting: ${this.plugin.settings.startHours}:0${value}`);
@@ -188,7 +214,7 @@ class SampleSettingTab extends PluginSettingTab {
       .addSlider((text) =>
         text
           .setValue(this.plugin.settings.endMinutes)
-          .setLimits(0, 59, 15)
+          .setLimits(0, 59, 5)
           .onChange(async (value) => {
             if (value < 10) {
               endMins.setDesc(`Ending: ${this.plugin.settings.endHours}:0${value}`);
