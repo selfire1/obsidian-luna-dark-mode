@@ -35,9 +35,9 @@ export default class Luna extends Plugin {
     // MANUAL MODE
     // ---------------------
     // Initial time check
-    this.checkTime(this);
+    this.checkTime();
     // Watch for time changes (every minute)
-    var timeChecker = setInterval(() => this.checkTime(this), 60000);
+    var timeChecker = setInterval(() => this.checkTime(), 60000); 
 
     // Remove interval when we unload
     this.register(() => clearInterval(timeChecker));
@@ -51,10 +51,8 @@ export default class Luna extends Plugin {
 
     let callback = () => {
       if (media.matches) {
-        console.log("Dark mode active");
         this.updateDarkStyle();
       } else {
-        console.log("Light mode active");
         this.updateLightStyle();
       }
     };
@@ -74,12 +72,12 @@ export default class Luna extends Plugin {
     await this.saveData(this.settings);
   }
 
-  checkTime(plugin: this) {
+  checkTime() {
     //  Load times
-    let startHours = plugin.settings.startHours;
-    let startMinutes = plugin.settings.startMinutes;
-    let endHours = plugin.settings.endHours;
-    let endMinutes = plugin.settings.endMinutes;
+    let startHours = this.settings.startHours;
+    let startMinutes = this.settings.startMinutes;
+    let endHours = this.settings.endHours;
+    let endMinutes = this.settings.endMinutes;
     let currentDate = new Date();
     let currentHours = currentDate.getHours();
     let currentMinutes = currentDate.getMinutes();
