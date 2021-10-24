@@ -156,19 +156,15 @@ class SettingTab extends PluginSettingTab {
      .onChange(async (value) => {
             this.plugin.settings.mode = value;
             await this.plugin.saveSettings();
-            console.log(`Changed mode to ${value}`)
             this.display()
-          })
-        }
-      );
-    
-      if (this.plugin.settings.mode === "system") {
+            console.log(`Changed mode to ${value}`)
+            if (this.plugin.settings.mode === "system") {
         // System mode
         containerEl.createEl("h3", { text: "Luna runs in system mode" });
         containerEl.createEl("h5", { text: "Note: Not supported on mobile." });
       } else if (this.plugin.settings.mode === "manual") {
-       
         // Manual mode
+       
       containerEl.createEl("h2", { text: "Manual mode" });
       containerEl.createEl("h3", { text: "Starting time 🌃" });
 
@@ -286,11 +282,15 @@ class SettingTab extends PluginSettingTab {
         );
     } else if (this.plugin.settings.mode === "sun") {
       // Sun mode
+
       containerEl.createEl("h2", { text: "Sun mode" });
       containerEl.createEl("a", {
-        text: "Click here for finding your coordinates.",
+        text: "Click here to find your coordinates.",
         href: "https://www.gps-coordinates.net/",
       });
     }
+  })
+}
+);
 }
 }
