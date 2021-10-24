@@ -92,7 +92,7 @@ export default class Luna extends Plugin {
     );
 
     if (
-      (currentHours >= startHours && currentMinutes > startMinutes) ||
+      (currentHours >= startHours && currentMinutes >= startMinutes) ||
       (currentHours <= endHours && currentMinutes < endMinutes)
     ) {
       console.log("Dark mode active");
@@ -176,9 +176,12 @@ class SettingTab extends PluginSettingTab {
               // System mode
 
               containerEl.createEl("h3", { text: "System mode" });
-              containerEl.createEl("p", { text: "Based on your system Luna will automatically change to dark or light mode." });
-              containerEl.createEl("p", { text: "⚠️ Note: Not supported on mobile." });
-        
+              containerEl.createEl("p", {
+                text: "Based on your system Luna will automatically change to dark or light mode.",
+              });
+              containerEl.createEl("p", {
+                text: "⚠️ Note: Not supported on mobile.",
+              });
             } else if (this.plugin.settings.mode === "manual") {
               // Manual mode
 
@@ -223,17 +226,17 @@ class SettingTab extends PluginSettingTab {
                     .onChange(async (value) => {
                       if (value < 10) {
                         startMins.setDesc(
-                          `Starting: ${this.plugin.settings.startHours}:0${value}`
+                          `Starting: ${this.plugin.settings.startHours}:0${value}h`
                         );
                         startHours.setDesc(
-                          `Starting: ${this.plugin.settings.startHours}:0${value}`
+                          `Starting: ${this.plugin.settings.startHours}:0${value}h`
                         );
                       } else {
                         startMins.setDesc(
-                          `Starting: ${this.plugin.settings.startHours}:${value}`
+                          `Starting: ${this.plugin.settings.startHours}:${value}h`
                         );
                         startHours.setDesc(
-                          `Starting: ${this.plugin.settings.startHours}:${value}`
+                          `Starting: ${this.plugin.settings.startHours}:${value}h`
                         );
                       }
                       this.plugin.settings.startMinutes = value;
@@ -255,17 +258,17 @@ class SettingTab extends PluginSettingTab {
                       // Prefix 0
                       if (this.plugin.settings.endMinutes < 10) {
                         endHours.setDesc(
-                          `Ending: ${value}:0${this.plugin.settings.endMinutes}`
+                          `Ending: ${value}:0${this.plugin.settings.endMinutes}h`
                         );
                         endMins.setDesc(
-                          `Ending: ${value}:0${this.plugin.settings.endMinutes}`
+                          `Ending: ${value}:0${this.plugin.settings.endMinutes}h`
                         );
                       } else {
                         endHours.setDesc(
-                          `Ending: ${value}:${this.plugin.settings.endMinutes}`
+                          `Ending: ${value}:${this.plugin.settings.endMinutes}h`
                         );
                         endMins.setDesc(
-                          `Ending: ${value}:${this.plugin.settings.endMinutes}`
+                          `Ending: ${value}:${this.plugin.settings.endMinutes}h`
                         );
                       }
                     })
@@ -307,6 +310,9 @@ class SettingTab extends PluginSettingTab {
               });
             }
           });
+
       });
+
+          
   }
 }
