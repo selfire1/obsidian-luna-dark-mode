@@ -87,6 +87,9 @@ export default class Luna extends Plugin {
     let currentMinutes = currentDate.getMinutes();
 
     console.log("Luna: Checking time…")
+    console.log(
+      `It is ${currentHours}:${currentMinutes}. Dark Mode starts ${startHours}:${startMinutes}. It ends ${endHours}:${endMinutes}`
+    );
 
     if (
       (currentHours >= startHours && currentMinutes > startMinutes) ||
