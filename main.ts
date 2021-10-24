@@ -10,6 +10,7 @@ import {
 
 // Initialize Settings
 interface MyPluginSettings {
+  mode: string;
   startHours: number;
   startMinutes: number;
   endHours: number;
@@ -17,6 +18,7 @@ interface MyPluginSettings {
 }
 // Default Settings
 const DEFAULT_SETTINGS: MyPluginSettings = {
+  mode: "manual",
   startHours: 19,
   startMinutes: 0,
   endHours: 6,
@@ -103,14 +105,15 @@ export default class Luna extends Plugin {
       window.matchMedia("(prefers-color-scheme: dark)").matches;
 
     if (isDarkMode) {
+      console.log("Dark mode active");
       this.updateDarkStyle();
     } else {
+      console.log("Light mode active");
       this.updateLightStyle();
     }
   }
   
   updateDarkStyle() {
-    console.log("Dark mode active");
     // @ts-ignore
     this.app.setTheme("obsidian");
     // @ts-ignore
@@ -119,7 +122,6 @@ export default class Luna extends Plugin {
   }
   
   updateLightStyle() {
-    console.log("Light mode active");
     // @ts-ignore
     this.app.setTheme("moonstone");
     // @ts-ignore
@@ -142,8 +144,24 @@ class SettingTab extends PluginSettingTab {
 
     containerEl.empty();
     
-    containerEl.createEl("h2", { text: "Luna Settings" });   
-    containerEl.createEl("h2", { text: "Starting time 🌃" });
+    containerEl.createEl("h2", { text: "Luna Settings" });
+
+    const mode = new Setting(containerEl)
+     .setName("Select mode")
+     .setDesc("Choose how you want Luna to function. Manual: Select a time, System: Follow the system (not supported on mobile), Sun: Follow sunrise and sunset.")
+     .addDropdown((dropdown) => {
+      dropdown.addOption("system", "System")
+      dropdown.addOption("manual", "Manual")
+      dropdown.addOption("sun", "Sunrise/Sunset")
+     .onChange(async (value) => {
+            this.plugin.settings.mode = value;
+            await this.plugin.saveSettings();
+          })
+        }
+      );
+    
+    containerEl.createEl("h2", { text: "Manual mode" });
+    containerEl.createEl("h3", { text: "Starting time 🌃" });
 
     const startHours = new Setting(containerEl)
       .setName("Hours")
@@ -184,7 +202,7 @@ class SettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
-    containerEl.createEl("h2", { text: "Ending time 🌅" });
+    containerEl.createEl("h3", { text: "Ending time 🌅" });
 
     const endHours = new Setting(containerEl)
       .setName("Hours")
