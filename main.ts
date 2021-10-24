@@ -7,6 +7,8 @@ import {
   PluginSettingTab,
   Setting,
 } from "obsidian";
+
+// Initialize Settings
 interface MyPluginSettings {
   mySetting: string;
   startHours: number;
@@ -14,7 +16,7 @@ interface MyPluginSettings {
   endHours: number;
   endMinutes: number;
 }
-
+// Default Settings
 const DEFAULT_SETTINGS: MyPluginSettings = {
   mySetting: "default",
   startHours: 19,
@@ -23,22 +25,23 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
   endMinutes: 0
 };
 
-export default class MobileDarkModeHelper extends Plugin {
+export default class Luna extends Plugin {
   settings: MyPluginSettings;
+
   async onload() {
-    // Settings
+    // Load settings
     await this.loadSettings();
     this.addSettingTab(new SampleSettingTab(this.app, this));
 
-    // Watch for system changes to color theme
-
-    let media = window.matchMedia("(prefers-color-scheme: dark)");
+    // Load times
     let startTime = "15:10";
     let endTime = "22:30";
-
     let currentDate = new Date();
     let currentHours = currentDate.getHours();
     let currentMinutes = currentDate.getMinutes();
+    
+    // Watch for system changes to color theme
+    let media = window.matchMedia("(prefers-color-scheme: dark)");
 
     let callback = () => {
       if (media.matches) {
@@ -67,7 +70,7 @@ export default class MobileDarkModeHelper extends Plugin {
   }
 
   onunload() {
-    console.log("System color scheme checking is turned off");
+    console.log("Advanced Dark Mode is turned off");
   }
 
   refreshSystemTheme() {
@@ -101,10 +104,11 @@ export default class MobileDarkModeHelper extends Plugin {
   }
 }
 
+// Settings
 class SampleSettingTab extends PluginSettingTab {
-  plugin: MobileDarkModeHelper;
+  plugin: Luna;
 
-  constructor(app: App, plugin: MobileDarkModeHelper) {
+  constructor(app: App, plugin: Luna) {
     super(app, plugin);
     this.plugin = plugin;
   }
@@ -114,7 +118,7 @@ class SampleSettingTab extends PluginSettingTab {
 
     containerEl.empty();
     
-    containerEl.createEl("h2", { text: "Mobile Dark Mode Helper Settings" });   
+    containerEl.createEl("h2", { text: "Luna Settings" });   
     containerEl.createEl("h2", { text: "Starting time 🌃" });
 
     const startHours = new Setting(containerEl)
