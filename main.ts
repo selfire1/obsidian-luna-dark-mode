@@ -158,6 +158,7 @@ class SettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
             this.display()
             console.log(`Changed mode to ${value}`)
+            
             if (this.plugin.settings.mode === "system") {
         // System mode
         containerEl.createEl("h3", { text: "Luna runs in system mode" });
