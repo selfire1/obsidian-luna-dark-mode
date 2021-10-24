@@ -10,7 +10,6 @@ import {
 
 // Initialize Settings
 interface MyPluginSettings {
-  mySetting: string;
   startHours: number;
   startMinutes: number;
   endHours: number;
@@ -18,7 +17,6 @@ interface MyPluginSettings {
 }
 // Default Settings
 const DEFAULT_SETTINGS: MyPluginSettings = {
-  mySetting: "default",
   startHours: 19,
   startMinutes: 0,
   endHours: 6,
@@ -31,11 +29,13 @@ export default class Luna extends Plugin {
   async onload() {
     // Load settings
     await this.loadSettings();
-    this.addSettingTab(new SampleSettingTab(this.app, this));
+    this.addSettingTab(new SettingTab(this.app, this));
 
     // ---------------------
     // MANUAL MODE
     // ---------------------
+    // Initial time check
+    this.checkTime();
     // Watch for time changes (every minute)
     var timeChecker = setInterval(this.checkTime, 60000);
 
@@ -76,13 +76,17 @@ export default class Luna extends Plugin {
 
   checkTime() {
     // Load times
-    let startHours = this.settings.startHours;
-    let startMinutes = this.settings.startMinutes;
-    let endHours = this.settings.endHours;
-    let endMinutes = this.settings.endMinutes;
+    let startHours = this.plugin.settings.startHours;
+    let startMinutes = this.plugin.settings.startMinutes;
+    let endHours = this.plugin.settings.endHours;
+    let endMinutes = this.plugin.settings.endMinutes;
     let currentDate = new Date();
     let currentHours = currentDate.getHours();
     let currentMinutes = currentDate.getMinutes();
+
+    console.log(
+      `Checking time. Start time: ${startHours}:${startMinutes} / End time: ${endHours}:${endMinutes}. Current time: ${currentHours}:${currentMinutes}`
+    );
 
     if (
       (currentHours >= startHours && currentMinutes > startMinutes) ||
@@ -131,7 +135,7 @@ export default class Luna extends Plugin {
 }
 
 // Settings
-class SampleSettingTab extends PluginSettingTab {
+class SettingTab extends PluginSettingTab {
   plugin: Luna;
 
   constructor(app: App, plugin: Luna) {
