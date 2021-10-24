@@ -146,7 +146,7 @@ class SettingTab extends PluginSettingTab {
     
     containerEl.createEl("h2", { text: "Luna Settings" });
 
-    const mode = new Setting(containerEl)
+    new Setting(containerEl)
      .setName("Select mode")
      .setDesc("Choose how you want Luna to function. Manual: Select a time, System: Follow the system (not supported on mobile), Sun: Follow sunrise and sunset.")
      .addDropdown((dropdown) => {
@@ -156,93 +156,141 @@ class SettingTab extends PluginSettingTab {
      .onChange(async (value) => {
             this.plugin.settings.mode = value;
             await this.plugin.saveSettings();
+            console.log(`Changed mode to ${value}`)
+            this.display()
           })
         }
       );
     
-    containerEl.createEl("h2", { text: "Manual mode" });
-    containerEl.createEl("h3", { text: "Starting time 🌃" });
+      if (this.plugin.settings.mode === "system") {
+        // System mode
+        containerEl.createEl("h3", { text: "Luna runs in system mode" });
+        containerEl.createEl("h5", { text: "Note: Not supported on mobile." });
+      } else if (this.plugin.settings.mode === "manual") {
+       
+        // Manual mode
+      containerEl.createEl("h2", { text: "Manual mode" });
+      containerEl.createEl("h3", { text: "Starting time 🌃" });
 
-    const startHours = new Setting(containerEl)
-      .setName("Hours")
-      .setDesc(`${this.plugin.settings.startHours}h`)
-      .addSlider((text) =>
-        text
-          .setValue(this.plugin.settings.startHours)
-          .setLimits(0, 23, 1)
-          .onChange(async (value) => {
-            this.plugin.settings.startHours = value;
-            // Prefix 0
-            if (this.plugin.settings.startMinutes < 10) {
-              startHours.setDesc(`Starting: ${value}:0${this.plugin.settings.startMinutes}`);
-              startMins.setDesc(`Starting: ${value}:0${this.plugin.settings.startMinutes}`);
-            } else {
-              startHours.setDesc(`Starting: ${value}:${this.plugin.settings.startMinutes}`);
-              startMins.setDesc(`Starting: ${value}:${this.plugin.settings.startMinutes}`);
-            }
-            await this.plugin.saveSettings();
-          })
-      );
-    const startMins = new Setting(containerEl)
-      .setName("Minutes")
-      .setDesc(`${this.plugin.settings.startMinutes} minutes`)
-      .addSlider((text) =>
-        text
-          .setValue(this.plugin.settings.startMinutes)
-          .setLimits(0, 59, 5)
-          .onChange(async (value) => {
-            if (value < 10) {
-              startMins.setDesc(`Starting: ${this.plugin.settings.startHours}:0${value}`);
-              startHours.setDesc(`Starting: ${this.plugin.settings.startHours}:0${value}`);
-            } else {
-              startMins.setDesc(`Starting: ${this.plugin.settings.startHours}:${value}`);
-              startHours.setDesc(`Starting: ${this.plugin.settings.startHours}:${value}`);
-            }
-            this.plugin.settings.startMinutes = value;
-            await this.plugin.saveSettings();
-          })
-      );
-    containerEl.createEl("h3", { text: "Ending time 🌅" });
+      const startHours = new Setting(containerEl)
+        .setName("Hours")
+        .setDesc(`${this.plugin.settings.startHours}h`)
+        .addSlider((text) =>
+          text
+            .setValue(this.plugin.settings.startHours)
+            .setLimits(0, 23, 1)
+            .onChange(async (value) => {
+              this.plugin.settings.startHours = value;
+              // Prefix 0
+              if (this.plugin.settings.startMinutes < 10) {
+                startHours.setDesc(
+                  `Starting: ${value}:0${this.plugin.settings.startMinutes}`
+                );
+                startMins.setDesc(
+                  `Starting: ${value}:0${this.plugin.settings.startMinutes}`
+                );
+              } else {
+                startHours.setDesc(
+                  `Starting: ${value}:${this.plugin.settings.startMinutes}`
+                );
+                startMins.setDesc(
+                  `Starting: ${value}:${this.plugin.settings.startMinutes}`
+                );
+              }
+              await this.plugin.saveSettings();
+            })
+        );
+      const startMins = new Setting(containerEl)
+        .setName("Minutes")
+        .setDesc(`${this.plugin.settings.startMinutes} minutes`)
+        .addSlider((text) =>
+          text
+            .setValue(this.plugin.settings.startMinutes)
+            .setLimits(0, 59, 5)
+            .onChange(async (value) => {
+              if (value < 10) {
+                startMins.setDesc(
+                  `Starting: ${this.plugin.settings.startHours}:0${value}`
+                );
+                startHours.setDesc(
+                  `Starting: ${this.plugin.settings.startHours}:0${value}`
+                );
+              } else {
+                startMins.setDesc(
+                  `Starting: ${this.plugin.settings.startHours}:${value}`
+                );
+                startHours.setDesc(
+                  `Starting: ${this.plugin.settings.startHours}:${value}`
+                );
+              }
+              this.plugin.settings.startMinutes = value;
+              await this.plugin.saveSettings();
+            })
+        );
+      containerEl.createEl("h3", { text: "Ending time 🌅" });
 
-    const endHours = new Setting(containerEl)
-      .setName("Hours")
-      .setDesc(`${this.plugin.settings.endHours}h`)
-      .addSlider((text) =>
-        text
-          .setValue(this.plugin.settings.endHours)
-          .setLimits(0, 23, 1)
-          .onChange(async (value) => {
-            this.plugin.settings.endHours = value;
-            // Prefix 0
-            if (this.plugin.settings.endMinutes < 10) {
-              endHours.setDesc(`Ending: ${value}:0${this.plugin.settings.endMinutes}`);
-              endMins.setDesc(`Ending: ${value}:0${this.plugin.settings.endMinutes}`);
-            } else {
-              endHours.setDesc(`Ending: ${value}:${this.plugin.settings.endMinutes}`);
-              endMins.setDesc(`Ending: ${value}:${this.plugin.settings.endMinutes}`);
-            }
-            await this.plugin.saveSettings();
-          })
-      );
-    const endMins = new Setting(containerEl)
-      .setName("Minutes")
-      .setDesc(`${this.plugin.settings.endMinutes} minutes`)
-      .addSlider((text) =>
-        text
-          .setValue(this.plugin.settings.endMinutes)
-          .setLimits(0, 59, 5)
-          .onChange(async (value) => {
-            if (value < 10) {
-              endMins.setDesc(`Ending: ${this.plugin.settings.endHours}:0${value}`);
-              endHours.setDesc(`Ending: ${this.plugin.settings.endHours}:0${value}`);
-            } else {
-              endMins.setDesc(`Ending: ${this.plugin.settings.endHours}:${value}`);
-              endHours.setDesc(`Ending: ${this.plugin.settings.endHours}:${value}`);
-            }
-            this.plugin.settings.endMinutes = value;
-            await this.plugin.saveSettings();
-          })
-      );
-
-  }
+      const endHours = new Setting(containerEl)
+        .setName("Hours")
+        .setDesc(`${this.plugin.settings.endHours}h`)
+        .addSlider((text) =>
+          text
+            .setValue(this.plugin.settings.endHours)
+            .setLimits(0, 23, 1)
+            .onChange(async (value) => {
+              this.plugin.settings.endHours = value;
+              // Prefix 0
+              if (this.plugin.settings.endMinutes < 10) {
+                endHours.setDesc(
+                  `Ending: ${value}:0${this.plugin.settings.endMinutes}`
+                );
+                endMins.setDesc(
+                  `Ending: ${value}:0${this.plugin.settings.endMinutes}`
+                );
+              } else {
+                endHours.setDesc(
+                  `Ending: ${value}:${this.plugin.settings.endMinutes}`
+                );
+                endMins.setDesc(
+                  `Ending: ${value}:${this.plugin.settings.endMinutes}`
+                );
+              }
+              await this.plugin.saveSettings();
+            })
+        );
+      const endMins = new Setting(containerEl)
+        .setName("Minutes")
+        .setDesc(`${this.plugin.settings.endMinutes} minutes`)
+        .addSlider((text) =>
+          text
+            .setValue(this.plugin.settings.endMinutes)
+            .setLimits(0, 59, 5)
+            .onChange(async (value) => {
+              if (value < 10) {
+                endMins.setDesc(
+                  `Ending: ${this.plugin.settings.endHours}:0${value}`
+                );
+                endHours.setDesc(
+                  `Ending: ${this.plugin.settings.endHours}:0${value}`
+                );
+              } else {
+                endMins.setDesc(
+                  `Ending: ${this.plugin.settings.endHours}:${value}`
+                );
+                endHours.setDesc(
+                  `Ending: ${this.plugin.settings.endHours}:${value}`
+                );
+              }
+              this.plugin.settings.endMinutes = value;
+              await this.plugin.saveSettings();
+            })
+        );
+    } else if (this.plugin.settings.mode === "sun") {
+      // Sun mode
+      containerEl.createEl("h2", { text: "Sun mode" });
+      containerEl.createEl("a", {
+        text: "Click here for finding your coordinates.",
+        href: "https://www.gps-coordinates.net/",
+      });
+    }
+}
 }
