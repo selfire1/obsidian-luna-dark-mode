@@ -10,6 +10,8 @@ import {
 
 // Initialize Settings
 interface MyPluginSettings {
+  latitude: string;
+  longitude: string;
   mode: string;
   startHours: number;
   startMinutes: number;
@@ -18,6 +20,8 @@ interface MyPluginSettings {
 }
 // Default Settings
 const DEFAULT_SETTINGS: MyPluginSettings = {
+  latitude: "",
+  longitude: "",
   mode: "manual",
   startHours: 19,
   startMinutes: 0,
@@ -41,9 +45,49 @@ export default class Luna extends Plugin {
       this.checkTime();
       // Watch for time changes (every minute)
       var timeChecker = setInterval(() => this.checkTime(), 60000);
-
+      
       // Remove interval when we unload
       this.register(() => clearInterval(timeChecker));
+      
+      // ---------------------
+      // SYSTEM MODE
+      // ---------------------
+    } else if (this.settings.mode === "system") {
+      // Watch for system changes to color theme
+      let media = window.matchMedia("(prefers-color-scheme: dark)");
+      
+      let callback = () => {
+        if (media.matches) {
+          this.updateDarkStyle();
+        } else {
+          this.updateLightStyle();
+        }
+      };
+      media.addEventListener("change", callback);
+      
+      // Remove listener when we unload
+      this.register(() => media.removeEventListener("change", callback));
+      callback();
+    } else if (this.settings.mode === "sun") {
+      // ---------------------
+      // SUN MODE
+      // ---------------------
+      setInterval(() => this.sunChecker(), 300000);
+    }
+  }
+
+  reload() {
+    // Remove Manual mode interval
+    this.register(() => clearInterval(timeChecker));
+
+    // ---------------------
+    // MANUAL MODE
+    // ---------------------
+    if (this.settings.mode === "manual") {
+      // Initial time check
+      this.checkTime();
+      // Watch for time changes (every minute)
+      var timeChecker = setInterval(() => this.checkTime(), 60000);
 
       // ---------------------
       // SYSTEM MODE
@@ -65,8 +109,54 @@ export default class Luna extends Plugin {
       // Remove listener when we unload
       this.register(() => media.removeEventListener("change", callback));
       callback();
-    }
+  } else if (this.settings.mode === "sun") {
+    // ---------------------
+    // SUN MODE
+    // ---------------------
+    setInterval(() => this.sunChecker(), 300000);
   }
+}
+
+  async sunChecker() {
+    console.log("Fetching sunset and sunrise…");
+    const url = `https://api.sunrise-sunset.org/json?lat=${this.settings.latitude}&lng=${this.settings.latitude}&formatted=0`;
+
+    let response = await fetch(url);
+
+    if (response.ok) {
+      // if HTTP-status is 200-299
+      let json = await response.json();
+      const myResponse = json;
+      console.log("Succesfully fetched sunrise and sunset");
+
+      //  Load times
+      let startHours = new Date(myResponse.results.sunset).getHours();
+      let startMinutes = new Date(myResponse.results.sunset).getMinutes();
+      let endHours = new Date(myResponse.results.sunrise).getHours();
+      let endMinutes = new Date(myResponse.results.sunrise).getMinutes();
+      let currentDate = new Date();
+      let currentHours = currentDate.getHours();
+      let currentMinutes = currentDate.getMinutes();
+
+      console.log("Luna: Checking sun…");
+      console.log(
+        `It is ${currentHours}:${currentMinutes}. Dark Mode starts ${startHours}:${startMinutes}. It ends ${endHours}:${endMinutes}`
+      );
+
+      if (
+        (currentHours >= startHours && currentMinutes >= startMinutes) ||
+        (currentHours <= endHours && currentMinutes < endMinutes)
+      ) {
+        console.log("Dark mode active");
+        this.updateDarkStyle();
+      } else {
+        console.log("Light mode active");
+        this.updateLightStyle();
+      }
+    } else {
+      alert("HTTP-Error: " + response.status);
+    }
+  };
 
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
@@ -171,6 +261,7 @@ class SettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
             this.display();
             console.log(`Changed mode to ${value}`);
+            this.plugin.reload();
           });
       });
 
@@ -193,7 +284,7 @@ class SettingTab extends PluginSettingTab {
           .addSlider((text) =>
             text
               .setValue(this.plugin.settings.startHours)
-              .setLimits(0, 23, 1)
+              .setLimits(1, 24, 1)
               .onChange(async (value) => {
                 this.plugin.settings.startHours = value;
                 await this.plugin.saveSettings();
@@ -250,7 +341,7 @@ class SettingTab extends PluginSettingTab {
           .addSlider((text) =>
             text
               .setValue(this.plugin.settings.endHours)
-              .setLimits(0, 23, 1)
+              .setLimits(1, 24, 1)
               .onChange(async (value) => {
                 this.plugin.settings.endHours = value;
                 await this.plugin.saveSettings();
@@ -303,10 +394,41 @@ class SettingTab extends PluginSettingTab {
         // Sun mode
 
         containerEl.createEl("h2", { text: "Sun mode" });
+
+        new Setting(containerEl)
+          .setName("Latitude")
+          .setDesc("Enter latitude in DD (Decimal Degrees)")
+          .addText((text) =>
+            text
+              .setValue(this.plugin.settings.latitude)
+              .onChange(async (value) => {
+                this.plugin.settings.latitude = value;
+                console.log(`Set latitude to ${value}`);
+                await this.plugin.saveSettings();
+              })
+          );
+        new Setting(containerEl)
+          .setName("Longitude")
+          .setDesc("Enter longitude in DD (Decimal Degrees)")
+          .addText((text) =>
+            text
+              .setValue(this.plugin.settings.longitude)
+              .onChange(async (value) => {
+                this.plugin.settings.longitude = value;
+                console.log(`Set longitude to ${value}`);
+                await this.plugin.saveSettings();
+              })
+          );
+
+        containerEl.createEl("h3", { text: "Coordinates" });
         containerEl.createEl("a", {
           text: "Click here to find your coordinates.",
           href: "https://www.gps-coordinates.net/",
         });
+        containerEl.createEl("h3", { text: "Credit" });
+      containerEl.createEl("p", {
+        text: "Sunset and sunrise times provided by https://sunrise-sunset.org/api.",
+      });
       }
 
   } 
