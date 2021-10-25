@@ -104,7 +104,7 @@ export default class Luna extends Plugin {
   }
 
   onunload() {
-    console.log("Advanced Dark Mode is turned off");
+    console.log("Luna Dark Mode Switcher is turned off");
   }
 
   refreshSystemTheme() {
