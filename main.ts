@@ -10,6 +10,8 @@ import {
 
 // Initialize Settings
 interface MyPluginSettings {
+  sunrise: string;
+  sunset: string;
   latitude: string;
   longitude: string;
   mode: string;
@@ -20,6 +22,8 @@ interface MyPluginSettings {
 }
 // Default Settings
 const DEFAULT_SETTINGS: MyPluginSettings = {
+  sunrise: "Waiting to fetch…",
+  sunset: "Waiting to fetch…",
   latitude: "",
   longitude: "",
   mode: "manual",
@@ -72,6 +76,7 @@ export default class Luna extends Plugin {
       // ---------------------
       // SUN MODE
       // ---------------------
+      this.sunChecker();
       setInterval(() => this.sunChecker(), 300000);
     }
   }
@@ -113,13 +118,14 @@ export default class Luna extends Plugin {
     // ---------------------
     // SUN MODE
     // ---------------------
+    this.sunChecker();
     setInterval(() => this.sunChecker(), 300000);
   }
 }
 
   async sunChecker() {
     console.log("Fetching sunset and sunrise…");
-    const url = `https://api.sunrise-sunset.org/json?lat=${this.settings.latitude}&lng=${this.settings.latitude}&formatted=0`;
+    const url = `https://api.sunrise-sunset.org/json?lat=${this.settings.latitude}&lng=${this.settings.longitude}&formatted=0`;
 
     let response = await fetch(url);
 
@@ -127,7 +133,9 @@ export default class Luna extends Plugin {
       // if HTTP-status is 200-299
       let json = await response.json();
       const myResponse = json;
-      console.log("Succesfully fetched sunrise and sunset");
+      console.log(
+        `Succesfully fetched sunrise and sunset. Sunset: ${myResponse.results.sunset} / Sunrise: ${myResponse.results.sunrise}`
+      );
 
       //  Load times
       let startHours = new Date(myResponse.results.sunset).getHours();
@@ -137,6 +145,10 @@ export default class Luna extends Plugin {
       let currentDate = new Date();
       let currentHours = currentDate.getHours();
       let currentMinutes = currentDate.getMinutes();
+
+      this.settings.sunset = new Date(myResponse.results.sunset).toString();
+      this.settings.sunrise = new Date(myResponse.results.sunrise).toString();
+      await this.saveSettings()
 
       console.log("Luna: Checking sun…");
       console.log(
@@ -405,6 +417,7 @@ class SettingTab extends PluginSettingTab {
                 this.plugin.settings.latitude = value;
                 console.log(`Set latitude to ${value}`);
                 await this.plugin.saveSettings();
+                this.plugin.sunChecker();
               })
           );
         new Setting(containerEl)
@@ -417,6 +430,7 @@ class SettingTab extends PluginSettingTab {
                 this.plugin.settings.longitude = value;
                 console.log(`Set longitude to ${value}`);
                 await this.plugin.saveSettings();
+                this.plugin.sunChecker();
               })
           );
 
@@ -427,8 +441,9 @@ class SettingTab extends PluginSettingTab {
         });
         containerEl.createEl("h3", { text: "Credit" });
       containerEl.createEl("p", {
-        text: "Sunset and sunrise times provided by https://sunrise-sunset.org/api.",
-      });
+        text: "Sunset and sunrise times provided by https://sunrise-sunset.org/api." });
+      containerEl.createEl("p", { text: `Sunset for location: ${this.plugin.settings.sunset}`  });
+      containerEl.createEl("p", { text: `Sunrise for location: ${this.plugin.settings.sunrise}`  });
       }
 
   } 
