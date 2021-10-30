@@ -5,7 +5,7 @@ import {
   Notice,
   Plugin,
   PluginSettingTab,
-  Setting,
+  Setting
 } from "obsidian";
 
 // Initialize Settings
@@ -128,7 +128,7 @@ export default class Luna extends Plugin {
     const url = `https://api.sunrise-sunset.org/json?lat=${this.settings.latitude}&lng=${this.settings.longitude}&formatted=0`;
 
     let response = await fetch(url);
-
+    
     if (response.ok) {
       // if HTTP-status is 200-299
       let json = await response.json();
@@ -138,33 +138,29 @@ export default class Luna extends Plugin {
       );
 
       //  Load times
-      let startHours = new Date(myResponse.results.sunset).getHours();
-      let startMinutes = new Date(myResponse.results.sunset).getMinutes();
-      let endHours = new Date(myResponse.results.sunrise).getHours();
-      let endMinutes = new Date(myResponse.results.sunrise).getMinutes();
-      let currentDate = new Date();
-      let currentHours = currentDate.getHours();
-      let currentMinutes = currentDate.getMinutes();
-
-      this.settings.sunset = new Date(myResponse.results.sunset).toString();
-      this.settings.sunrise = new Date(myResponse.results.sunrise).toString();
-      await this.saveSettings()
-
-      console.log("Luna: Checking sun…");
-      console.log(
-        `It is ${currentHours}:${currentMinutes}. Dark Mode starts ${startHours}:${startMinutes}. It ends ${endHours}:${endMinutes}`
-      );
+      let sunriseUTC = new Date(myResponse.results.sunrise);
+      let sunsetUTC = new Date(myResponse.results.sunset);
+      let now = Date.now();
 
       if (
-        (currentHours >= startHours && currentMinutes >= startMinutes) ||
-        (currentHours <= endHours && currentMinutes < endMinutes)
+        // Now is after sunrise
+        now.valueOf() > sunriseUTC.valueOf() 
+      && 
+      // and now is before sunset
+      now.valueOf() < sunsetUTC.valueOf()
       ) {
-        console.log("Dark mode active");
-        this.updateDarkStyle();
-      } else {
-        console.log("Light mode active");
+        // Therefore we want light mode
         this.updateLightStyle();
+      } else {
+        // All other times we want dark mode
+        this.updateDarkStyle();
       }
+
+      this.settings.sunset =
+        sunsetUTC.getHours().toString() + ":" + sunsetUTC.getMinutes().toString();
+      this.settings.sunrise =
+        sunriseUTC.getHours().toString() + ":" + sunriseUTC.getMinutes().toString();
+      await this.saveSettings()
     } else {
       alert("HTTP-Error: " + response.status);
     }
@@ -438,8 +434,15 @@ class SettingTab extends PluginSettingTab {
           window.open("https://www.gps-coordinates.net/");
         })
       );
+      
+      containerEl.createEl("h3", { text: "Times" });
+      containerEl.createEl("p", {
+        text: `🌅 Sunrise today: ${this.plugin.settings.sunrise}` });
+      containerEl.createEl("p", {
+        text: `🌃 Sunset today: ${this.plugin.settings.sunset}` });
+      
 
-        containerEl.createEl("h3", { text: "Credit" });
+      containerEl.createEl("h3", { text: "Credit" });
       containerEl.createEl("p", {
         text: "Sunset and sunrise times provided by sunrise-sunset.org/api." });
       }
