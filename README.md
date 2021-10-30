@@ -12,7 +12,7 @@ A plugin for [Obsidian](https://obsidian.md/) based on [kepano/obsidian-system-d
 
 ## Additional tools
 * 🎨 [Obsidian You](https://github.com/selfire1/obsidian-you-theme): A personal Obsidian theme designed exclusively for mobile.
-* 📱 [Set Mobile Theme](https://github.com/selfire1/obsidian-set-mobile-theme): Load a seperate theme for Obsidian on Desktop and on Mobile.
+* 📱 [Set Mobile Theme](https://github.com/selfire1/obsidian-set-mobile-theme): Load a separate theme for Obsidian on Desktop and on Mobile.
 * 🌝 [Luna – Dark Mode Helper](https://github.com/selfire1/obsidian-luna-dark-mode): An Obsidian Plugin that switches into Dark Mode based on time or sun position, supporting Mobile.
 
 ## Credit
