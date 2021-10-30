@@ -464,7 +464,7 @@ class SettingTab extends PluginSettingTab {
         text: `🌃 Sunset today: ${this.plugin.settings.sunset}` });
       
 
-      containerEl.createEl("h3", { text: "Credit" });
+      containerEl.createEl("h2", { text: "Credit" });
       containerEl.createEl("p", {
         text: "Sunset and sunrise times provided by sunrise-sunset.org/api." });
       }
