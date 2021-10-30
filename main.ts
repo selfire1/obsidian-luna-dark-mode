@@ -140,7 +140,7 @@ export default class Luna extends Plugin {
       //  Load times
       let sunriseUTC = new Date(myResponse.results.sunrise);
       let sunsetUTC = new Date(myResponse.results.sunset);
-      let now = Date.now();
+      let now = new Date;
 
       if (
         // Now is after sunrise
@@ -156,10 +156,29 @@ export default class Luna extends Plugin {
         this.updateDarkStyle();
       }
 
-      this.settings.sunset =
-        sunsetUTC.getHours().toString() + ":" + sunsetUTC.getMinutes().toString();
-      this.settings.sunrise =
-        sunriseUTC.getHours().toString() + ":" + sunriseUTC.getMinutes().toString();
+      // Writing settings
+      let originArr = [
+        sunsetUTC.getHours(),
+        sunsetUTC.getMinutes(),
+        sunriseUTC.getHours(),
+        sunriseUTC.getMinutes(),
+      ];
+      let numArr = [];
+
+      for (let i = 0; i < originArr.length; i++) {
+        const element = originArr[i];
+        if (originArr[i] < 10) {
+          numArr.push("0" + originArr[i].toString());
+        } else {
+          numArr.push(originArr[i].toString());
+        }
+      }
+
+      if (sunsetUTC.getHours() < 10) {
+      } else {
+      }
+      this.settings.sunset = numArr[0] + ":" + numArr[1];
+      this.settings.sunrise = numArr[2] + ":" + numArr[3];
       await this.saveSettings()
     } else {
       alert("HTTP-Error: " + response.status);
@@ -176,29 +195,27 @@ export default class Luna extends Plugin {
 
   checkTime() {
     //  Load times
-    let startHours = this.settings.startHours;
-    let startMinutes = this.settings.startMinutes;
-    let endHours = this.settings.endHours;
-    let endMinutes = this.settings.endMinutes;
-    let currentDate = new Date();
-    let currentHours = currentDate.getHours();
-    let currentMinutes = currentDate.getMinutes();
-
-    console.log("Luna: Checking time…")
-    console.log(
-      `It is ${currentHours}:${currentMinutes}. Dark Mode starts ${startHours}:${startMinutes}. It ends ${endHours}:${endMinutes}`
-    );
+    let startDark = new Date(new Date().setHours(this.settings.startHours, this.settings.startMinutes, 0));
+    let endDark = new Date(new Date().setHours(this.settings.endHours, this.settings.endMinutes, 0));
+    let now = new Date;
+    console.log("Luna: Checking time…");
 
     if (
-      (currentHours >= startHours && currentMinutes >= startMinutes) ||
-      (currentHours <= endHours && currentMinutes < endMinutes)
+      // Now is after end of Dark mode
+      now.valueOf() > endDark.valueOf() &&
+      // and now is before start of Dark mode
+      now.valueOf() < startDark.valueOf()
     ) {
-      console.log("Dark mode active");
-      this.updateDarkStyle();
-    } else {
-      console.log("Light mode active");
+      // Therefore we want light mode
       this.updateLightStyle();
+    } else {
+      // All other times we want dark mode
+      this.updateDarkStyle();
     }
+
+    console.log(
+      `It is ${now.getHours()}:${now.getMinutes()}. Dark Mode starts ${startDark.getHours()}:${startDark.getMinutes()}. It ends ${endDark.getHours()}:${endDark.getMinutes()}`
+    );
   }
 
   onunload() {
@@ -295,23 +312,24 @@ class SettingTab extends PluginSettingTab {
               .setLimits(1, 24, 1)
               .onChange(async (value) => {
                 this.plugin.settings.startHours = value;
-                await this.plugin.saveSettings();
                 // Prefix 0
                 if (this.plugin.settings.startMinutes < 10) {
                   startHours.setDesc(
                     `Starting: ${value}:0${this.plugin.settings.startMinutes}`
-                  );
-                  startMins.setDesc(
-                    `Starting: ${value}:0${this.plugin.settings.startMinutes}`
-                  );
-                } else {
-                  startHours.setDesc(
-                    `Starting: ${value}:${this.plugin.settings.startMinutes}`
-                  );
-                  startMins.setDesc(
-                    `Starting: ${value}:${this.plugin.settings.startMinutes}`
-                  );
-                }
+                    );
+                    startMins.setDesc(
+                      `Starting: ${value}:0${this.plugin.settings.startMinutes}`
+                      );
+                    } else {
+                      startHours.setDesc(
+                        `Starting: ${value}:${this.plugin.settings.startMinutes}`
+                        );
+                        startMins.setDesc(
+                          `Starting: ${value}:${this.plugin.settings.startMinutes}`
+                          );
+                        }
+                await this.plugin.saveSettings();
+                this.plugin.checkTime();
               })
           );
         const startMins = new Setting(containerEl)
@@ -339,7 +357,9 @@ class SettingTab extends PluginSettingTab {
                 }
                 this.plugin.settings.startMinutes = value;
                 await this.plugin.saveSettings();
-              })
+                this.plugin.checkTime();
+              }
+              )
           );
         containerEl.createEl("h3", { text: "Ending time 🌅" });
 
@@ -352,22 +372,23 @@ class SettingTab extends PluginSettingTab {
               .setLimits(1, 24, 1)
               .onChange(async (value) => {
                 this.plugin.settings.endHours = value;
-                await this.plugin.saveSettings();
                 // Prefix 0
                 if (this.plugin.settings.endMinutes < 10) {
                   endHours.setDesc(
                     `Ending: ${value}:0${this.plugin.settings.endMinutes}`
-                  );
-                  endMins.setDesc(
-                    `Ending: ${value}:0${this.plugin.settings.endMinutes}`
-                  );
-                } else {
-                  endHours.setDesc(
-                    `Ending: ${value}:${this.plugin.settings.endMinutes}`
-                  );
-                  endMins.setDesc(
-                    `Ending: ${value}:${this.plugin.settings.endMinutes}`
-                  );
+                    );
+                    endMins.setDesc(
+                      `Ending: ${value}:0${this.plugin.settings.endMinutes}`
+                      );
+                    } else {
+                      endHours.setDesc(
+                        `Ending: ${value}:${this.plugin.settings.endMinutes}`
+                        );
+                        endMins.setDesc(
+                          `Ending: ${value}:${this.plugin.settings.endMinutes}`
+                          );
+                    await this.plugin.saveSettings();
+                    this.plugin.checkTime();
                 }
               })
           );
@@ -396,6 +417,7 @@ class SettingTab extends PluginSettingTab {
                 }
                 this.plugin.settings.endMinutes = value;
                 await this.plugin.saveSettings();
+                this.plugin.checkTime();
               })
           );
       } else if (this.plugin.settings.mode === "sun") {
