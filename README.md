@@ -7,8 +7,8 @@ A plugin for [Obsidian](https://obsidian.md/) based on [kepano/obsidian-system-d
 
 ## Modes
 * **System Mode**: Luna will switch into dark or light mode following on your system. ⚠️ `Warning`: Currently not supported for mobile.
-**Manual Mode**: Dark mode will be activated based on set times.
-**Sun Mode**: Luna will activate dark mode at sunset and light mode at sunrise based on your coordinates.
+* **Manual Mode**: Dark mode will be activated based on set times.
+* **Sun Mode**: Luna will activate dark mode at sunset and light mode at sunrise based on your coordinates.
 
 ## Additional tools
 * 🎨 [Obsidian You](https://github.com/selfire1/obsidian-you-theme): A personal Obsidian theme designed exclusively for mobile.
