@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-luna-dark-mode",
 	"name": "Luna: Dark Mode Switcher",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"minAppVersion": "0.12.0",
 	"description": "Automate switching to dark and light mode.",
 	"author": "Joschua",
