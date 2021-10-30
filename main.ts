@@ -433,17 +433,15 @@ class SettingTab extends PluginSettingTab {
                 this.plugin.sunChecker();
               })
           );
+      new Setting(containerEl).addButton((cb) =>
+        cb.setButtonText("Search Coordinates").onClick(() => {
+          window.open("https://www.gps-coordinates.net/");
+        })
+      );
 
-        containerEl.createEl("h3", { text: "Coordinates" });
-        containerEl.createEl("a", {
-          text: "Click here to find your coordinates.",
-          href: "https://www.gps-coordinates.net/",
-        });
         containerEl.createEl("h3", { text: "Credit" });
       containerEl.createEl("p", {
-        text: "Sunset and sunrise times provided by https://sunrise-sunset.org/api." });
-      containerEl.createEl("p", { text: `Sunset for location: ${this.plugin.settings.sunset}`  });
-      containerEl.createEl("p", { text: `Sunrise for location: ${this.plugin.settings.sunrise}`  });
+        text: "Sunset and sunrise times provided by sunrise-sunset.org/api." });
       }
 
   } 
