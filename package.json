@@ -1,6 +1,6 @@
 {
   "name": "obsidian-luna-dark-mode",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Automate switching to dark and light mode.",
   "main": "main.js",
   "scripts": {
