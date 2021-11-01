@@ -1,11 +1,15 @@
 {
-  "name": "obsidian-sample-plugin",
-  "version": "0.9.7",
-  "description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+  "name": "obsidian-luna-dark-mode",
+  "version": "0.1.1",
+  "description": "Automate switching to dark and light mode.",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
-    "build": "rollup --config rollup.config.js"
+    "build": "rollup --config rollup.config.js",
+    "release": "standard-version"
+  },
+  "standard-version": {
+    "t": ""
   },
   "keywords": [],
   "author": "",
@@ -17,6 +21,7 @@
     "@types/node": "^14.14.2",
     "obsidian": "https://github.com/obsidianmd/obsidian-api/tarball/master",
     "rollup": "^2.32.1",
+    "standard-version": "^9.3.2",
     "tslib": "^2.0.3",
     "typescript": "^4.0.3"
   }
