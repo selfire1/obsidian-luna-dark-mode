@@ -10,8 +10,10 @@ import {
 
 // Initialize Settings
 interface MyPluginSettings {
-  sunrise: string;
-  sunset: string;
+  sunriseTime: string;
+  sunsetTime: string;
+  sunrise: Date;
+  sunset: Date;
   latitude: string;
   longitude: string;
   mode: string;
@@ -22,8 +24,10 @@ interface MyPluginSettings {
 }
 // Default Settings
 const DEFAULT_SETTINGS: MyPluginSettings = {
-  sunrise: "Waiting to fetch…",
-  sunset: "Waiting to fetch…",
+  sunriseTime: "Waiting to fetch…",
+  sunsetTime: "Waiting to fetch…",
+  sunrise: new Date(1635721200000), // This is just Nov 1, 2021 – When I implemented this setting!
+  sunset: new Date(1635721200000),
   latitude: "",
   longitude: "",
   mode: "manual",
@@ -76,12 +80,34 @@ export default class Luna extends Plugin {
       // ---------------------
       // SUN MODE
       // ---------------------
-      this.sunChecker();
-      setInterval(() => this.sunChecker(), 300000);
+
+      this.checkSunData(); // Is the sun data we have for today?
+      this.checkSunTime(); // Where is now in comparison to sunset and sunrise?
+
+      // Check every minute if the sun has set/risen yet!
+      var checkSunTimeInterval = setInterval(() => this.checkSunTime(), 60000);
+
+      // Remove interval on unload
+      this.register(() => clearInterval(checkSunTimeInterval));
     }
   }
 
-  reload() {
+  checkSunData() {
+    // This function checks if the data for sunrise/sunset in the settings is for today. Otherwise it triggers a function to fetch new data.
+
+    // By .setHours(0, 0, 0, 0) all time is set to 0, only the date gets compared
+    const sunriseDate = new Date(this.settings.sunrise).setHours(0, 0, 0, 0);
+    const sunsetDate = new Date(this.settings.sunset).setHours(0, 0, 0, 0);
+    const today = new Date().setHours(0, 0, 0, 0);
+    if (sunriseDate < today && sunsetDate < today) {
+      // The data for the sun is old → We need to fetch new data
+      this.fetchSunData();
+    }
+
+  }
+
+
+  reload() { // Whenever a change is made to the settings
     // Remove Manual mode interval
     this.register(() => clearInterval(timeChecker));
 
@@ -98,7 +124,6 @@ export default class Luna extends Plugin {
       // SYSTEM MODE
       // ---------------------
     } else if (this.settings.mode === "system") {
-
       // Watch for system changes to color theme
       let media = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -114,16 +139,43 @@ export default class Luna extends Plugin {
       // Remove listener when we unload
       this.register(() => media.removeEventListener("change", callback));
       callback();
-  } else if (this.settings.mode === "sun") {
-    // ---------------------
-    // SUN MODE
-    // ---------------------
-    this.sunChecker();
-    setInterval(() => this.sunChecker(), 300000);
+    } else if (this.settings.mode === "sun") {
+      // ---------------------
+      // SUN MODE
+      // ---------------------
+
+      this.checkSunData(); // Is the sun data we have for today?
+      this.checkSunTime(); // Where is now in comparison to sunset and sunrise?
+
+      // Check every minute if the sun has set/risen yet!
+      var checkSunTimeInterval = setInterval(() => this.checkSunTime(), 60000);
+
+      // Remove interval on unload
+      this.register(() => clearInterval(checkSunTimeInterval));
+    }
+  }
+
+checkSunTime() {
+  //  Load times
+  let sunriseUTC = new Date(this.settings.sunrise);
+  let sunsetUTC = new Date(this.settings.sunset);
+  let now = new Date();
+
+  if (
+    // Now is after sunrise
+    now.valueOf() > sunriseUTC.valueOf() &&
+    // and now is before sunset
+    now.valueOf() < sunsetUTC.valueOf()
+  ) {
+    // Therefore we want light mode
+    this.updateLightStyle();
+  } else {
+    // All other times we want dark mode
+    this.updateDarkStyle();
   }
 }
 
-  async sunChecker() {
+  async fetchSunData() {
     console.log("Fetching sunset and sunrise…");
     const url = `https://api.sunrise-sunset.org/json?lat=${this.settings.latitude}&lng=${this.settings.longitude}&formatted=0`;
 
@@ -137,24 +189,13 @@ export default class Luna extends Plugin {
         `Succesfully fetched sunrise and sunset. Sunset: ${myResponse.results.sunset} / Sunrise: ${myResponse.results.sunrise}`
       );
 
+      // Save sunrise and sunset as a Date
+      this.settings.sunrise = new Date(myResponse.results.sunrise);
+      this.settings.sunset = new Date(myResponse.results.sunset);
+      
       //  Load times
       let sunriseUTC = new Date(myResponse.results.sunrise);
       let sunsetUTC = new Date(myResponse.results.sunset);
-      let now = new Date;
-
-      if (
-        // Now is after sunrise
-        now.valueOf() > sunriseUTC.valueOf() 
-      && 
-      // and now is before sunset
-      now.valueOf() < sunsetUTC.valueOf()
-      ) {
-        // Therefore we want light mode
-        this.updateLightStyle();
-      } else {
-        // All other times we want dark mode
-        this.updateDarkStyle();
-      }
 
       // Writing settings
       let originArr = [
@@ -177,8 +218,8 @@ export default class Luna extends Plugin {
       if (sunsetUTC.getHours() < 10) {
       } else {
       }
-      this.settings.sunset = numArr[0] + ":" + numArr[1];
-      this.settings.sunrise = numArr[2] + ":" + numArr[3];
+      this.settings.sunsetTime = numArr[0] + ":" + numArr[1];
+      this.settings.sunriseTime = numArr[2] + ":" + numArr[3];
       await this.saveSettings()
     } else {
       alert("HTTP-Error: " + response.status);
@@ -435,7 +476,8 @@ class SettingTab extends PluginSettingTab {
                 this.plugin.settings.latitude = value;
                 console.log(`Set latitude to ${value}`);
                 await this.plugin.saveSettings();
-                this.plugin.sunChecker();
+                this.plugin.fetchSunData();
+                this.plugin.checkSunTime();
               })
           );
         new Setting(containerEl)
@@ -448,7 +490,8 @@ class SettingTab extends PluginSettingTab {
                 this.plugin.settings.longitude = value;
                 console.log(`Set longitude to ${value}`);
                 await this.plugin.saveSettings();
-                this.plugin.sunChecker();
+                this.plugin.fetchSunData();
+                this.plugin.checkSunTime();
               })
           );
       new Setting(containerEl).addButton((cb) =>
@@ -459,9 +502,9 @@ class SettingTab extends PluginSettingTab {
       
       containerEl.createEl("h3", { text: "Times" });
       containerEl.createEl("p", {
-        text: `🌅 Sunrise today: ${this.plugin.settings.sunrise}` });
+        text: `🌅 Sunrise today: ${this.plugin.settings.sunriseTime}` });
       containerEl.createEl("p", {
-        text: `🌃 Sunset today: ${this.plugin.settings.sunset}` });
+        text: `🌃 Sunset today: ${this.plugin.settings.sunsetTime}` });
       
 
       containerEl.createEl("h2", { text: "Credit" });
