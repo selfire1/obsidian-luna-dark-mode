@@ -41,8 +41,12 @@ export default class Luna extends Plugin {
   settings: MyPluginSettings;
 
   async onload() {
+    console.log("Luna loaded.")
     // Load settings
     await this.loadSettings();
+
+    console.log(this.settings.mode);
+
     this.addSettingTab(new SettingTab(this.app, this));
 
     // ---------------------
@@ -52,7 +56,7 @@ export default class Luna extends Plugin {
       // Initial time check
       this.checkTime();
       // Watch for time changes (every minute)
-      var timeChecker = setInterval(() => this.checkTime(), 60000);
+      const timeChecker = setInterval(() => this.checkTime(), 60000);
       
       // Remove interval when we unload
       this.register(() => clearInterval(timeChecker));
@@ -77,10 +81,12 @@ export default class Luna extends Plugin {
       this.register(() => media.removeEventListener("change", callback));
       callback();
     } else if (this.settings.mode === "sun") {
+      console.log("We're in sun mode!")
       // ---------------------
       // SUN MODE
       // ---------------------
-
+      
+      // this.fetchSunData(); Unnecessary
       this.checkSunData(); // Is the sun data we have for today?
       this.checkSunTime(); // Where is now in comparison to sunset and sunrise?
 
@@ -94,7 +100,7 @@ export default class Luna extends Plugin {
 
   checkSunData() {
     // This function checks if the data for sunrise/sunset in the settings is for today. Otherwise it triggers a function to fetch new data.
-
+    console.log("Checking sun time in relation to now!")
     // By .setHours(0, 0, 0, 0) all time is set to 0, only the date gets compared
     const sunriseDate = new Date(this.settings.sunrise).setHours(0, 0, 0, 0);
     const sunsetDate = new Date(this.settings.sunset).setHours(0, 0, 0, 0);
@@ -102,6 +108,8 @@ export default class Luna extends Plugin {
     if (sunriseDate < today && sunsetDate < today) {
       // The data for the sun is old → We need to fetch new data
       this.fetchSunData();
+    } else {
+      console.log("Sun data is accurate")
     }
 
   }
@@ -144,18 +152,23 @@ export default class Luna extends Plugin {
       // SUN MODE
       // ---------------------
 
+      this.fetchSunData();
       this.checkSunData(); // Is the sun data we have for today?
       this.checkSunTime(); // Where is now in comparison to sunset and sunrise?
 
       // Check every minute if the sun has set/risen yet!
-      var checkSunTimeInterval = setInterval(() => this.checkSunTime(), 60000);
+      // var checkSunTimeInterval = setInterval(() => this.checkSunTime(), 60000);
+      console.log("PreInitialised interval")
+      setInterval(() => this.checkSunTime(), 60000);
+      console.log("Initialised interval")
 
       // Remove interval on unload
-      this.register(() => clearInterval(checkSunTimeInterval));
+      // this.register(() => clearInterval(checkSunTimeInterval));
     }
   }
 
 checkSunTime() {
+  console.log("Checking sun time")
   //  Load times
   let sunriseUTC = new Date(this.settings.sunrise);
   let sunsetUTC = new Date(this.settings.sunset);
@@ -186,7 +199,7 @@ checkSunTime() {
       let json = await response.json();
       const myResponse = json;
       console.log(
-        `Succesfully fetched sunrise and sunset. Sunset: ${myResponse.results.sunset} / Sunrise: ${myResponse.results.sunrise}`
+        `Succesfully fetched sunrise and sunset (UTC). Sunrise: ${myResponse.results.sunrise} / Sunset: ${myResponse.results.sunset}`
       );
 
       // Save sunrise and sunset as a Date
@@ -206,6 +219,7 @@ checkSunTime() {
       ];
       let numArr = [];
 
+      // Prepend 0 to single digits for display
       for (let i = 0; i < originArr.length; i++) {
         const element = originArr[i];
         if (originArr[i] < 10) {
@@ -215,14 +229,12 @@ checkSunTime() {
         }
       }
 
-      if (sunsetUTC.getHours() < 10) {
-      } else {
-      }
+      // Concatenate strings for display
       this.settings.sunsetTime = numArr[0] + ":" + numArr[1];
       this.settings.sunriseTime = numArr[2] + ":" + numArr[3];
       await this.saveSettings()
     } else {
-      alert("HTTP-Error: " + response.status);
+      new Notice("Luna: Error fetching data. " + response.status);
     }
   };
 
@@ -261,6 +273,9 @@ checkSunTime() {
 
   onunload() {
     console.log("Luna Dark Mode Switcher is turned off");
+    // this.register(() => clearInterval(timeChecker));
+    // clearInterval(timeChecker);
+    // clearInterval(checkSunTimeInterval);
   }
 
   refreshSystemTheme() {
