@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.1.3](https://github.com/selfire1/obsidian-luna-dark-mode/compare/0.1.2...0.1.3) (2021-11-01)
+
+
+### Bug Fixes
+
+* 🐛 Fix bugs with saving sun data offline
+
 ### [0.1.2](https://github.com/selfire1/obsidian-luna-dark-mode/compare/0.1.1...0.1.2) (2021-11-01)
 
 
