@@ -1,14 +1,24 @@
-## Overview
+# Luna: Dark Mode Switcher 🌝
+A plugin for [Obsidian](https://obsidian.md/) based on [kepano/obsidian-system-dark-mode](https://github.com/kepano/obsidian-system-dark-mode).
 
-When this plugin is on, Obsidian will automatically use the operating system setting for light vs. dark mode. On newer operating systems this allows you to automatically switch based on time of day, and match your other apps.
+<img src="https://github.com/selfire1/obsidian-luna-dark-mode/blob/master/images/settings.png?raw=true" width="800" />
 
-## Support my work
+> 🚧 Status: Available through [BRAT](https://github.com/TfTHacker/obsidian42-brat).
 
-Support the development of my plugins and themes **@kepano** on [Twitter](https://www.twitter.com/kepano), [Patreon](https://www.patreon.com/kepano) or [Buy me a coffee](https://www.buymeacoffee.com/kepano).
+## Modes
+* **System Mode**: Luna will switch into dark or light mode following on your system. ⚠️ `Warning`: Currently not supported for mobile.
+* **Manual Mode**: Dark mode will be activated based on set times.
+* **Sun Mode**: Luna will activate dark mode at sunset and light mode at sunrise based on your coordinates.
 
-<a href="https://www.buymeacoffee.com/kepano"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=kepano&button_colour=5F7FFF&font_colour=ffffff&font_family=Poppins&outline_colour=000000&coffee_colour=FFDD00"></a>
+## Additional tools
+* 🎨 [Obsidian You](https://github.com/selfire1/obsidian-you-theme): A personal Obsidian theme designed exclusively for mobile.
+* 📱 [Set Mobile Theme](https://github.com/selfire1/obsidian-set-mobile-theme): Load a separate theme for Obsidian on Desktop and on Mobile.
+* 🌝 [Luna – Dark Mode Helper](https://github.com/selfire1/obsidian-luna-dark-mode): An Obsidian Plugin that switches into Dark Mode based on time or sun position, supporting Mobile.
 
-## Related plugins
+## Credit
+Sunset and sunrise times provided by [Sunset and sunrise times API - Sunrise-Sunset.org](https://sunrise-sunset.org/api).
 
-- [Hider](https://github.com/kepano/obsidian-hider), allows you to selectively hide parts of the Obsidian interface.
-- [Minimal Theme Settings](https://github.com/kepano/obsidian-minimal-settings), allows you to customize fonts, colors, and more details of the [Minimal Theme](https://github.com/kepano/obsidian-minimal).
+## Support
+You can help me keep creating tools like this by [buying me a coffee](https://www.buymeacoffee.com/joschua).  ☕️
+
+<a href="https://www.buymeacoffee.com/joschua" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height= "48" width="173"></a>
