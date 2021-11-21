@@ -68,13 +68,25 @@ export default class Luna extends Plugin {
     // MANUAL MODE
     // ---------------------
     if (this.settings.mode === "manual") {
-      // Initial time check
-      this.checkTime();
-      // Watch for time changes (every minute)
-      const timeChecker = setInterval(() => this.checkTime(), 60000);
-
-      // Remove interval when we unload
-      this.register(() => clearInterval(timeChecker));
+      // Passing variables into the checker running every minute
+      this.checkTimePassing(
+        // Start of dark mode
+        new Date(
+          new Date().setHours(
+            this.settings.startHours,
+            this.settings.startMinutes,
+            0
+            )
+            ),
+            // End of dark mode
+            new Date(
+          new Date().setHours(
+            this.settings.endHours,
+            this.settings.endMinutes,
+            0
+          )
+        )
+      );
 
       // ---------------------
       // SYSTEM MODE
@@ -101,8 +113,13 @@ export default class Luna extends Plugin {
       // SUN MODE
       // ---------------------
 
-      // this.fetchSunData(); Unnecessary
-      this.checkSunData(); // Is the sun data we have for today?
+      this.checkSunData(); // Is the sun data we have for today? Otherwise, fetch new data
+      
+      this.checkTimePassing(
+        new Date(this.settings.sunrise),
+        new Date(this.settings.sunset)
+      );
+      
       this.checkSunTime(); // Where is now in comparison to sunset and sunrise?
 
       // Check every minute if the sun has set/risen yet!
@@ -176,6 +193,22 @@ export default class Luna extends Plugin {
     } else {
       new Notice("Luna: Error fetching data. " + response.status);
     }
+  }
+
+  checkTimePassing(endDark: Date, startDark: Date){
+    let now = new Date();
+        if (
+          // Now is after end of Dark mode
+          now.valueOf() > endDark.valueOf() &&
+          // and now is before start of Dark mode
+          now.valueOf() < startDark.valueOf()
+        ) {
+          // Therefore we want light mode
+          this.updateLightStyle();
+        } else {
+          // All other times we want dark mode
+          this.updateDarkStyle();
+        }
   }
 
   checkSunTime() {
