@@ -347,7 +347,7 @@ class SettingTab extends PluginSettingTab {
                           );
                         }
                 await this.plugin.saveSettings();
-                this.plugin.checkTime();
+                this.plugin.refreshTimeBased();
               })
           );
         const startMins = new Setting(containerEl)
@@ -375,7 +375,7 @@ class SettingTab extends PluginSettingTab {
                 }
                 this.plugin.settings.startMinutes = value;
                 await this.plugin.saveSettings();
-                this.plugin.checkTime();
+                this.plugin.refreshTimeBased();
               }
               )
           );
@@ -406,7 +406,7 @@ class SettingTab extends PluginSettingTab {
                           `Ending: ${value}:${this.plugin.settings.endMinutes}`
                           );
                     await this.plugin.saveSettings();
-                    this.plugin.checkTime();
+                    this.plugin.refreshTimeBased();
                 }
               })
           );
@@ -435,7 +435,7 @@ class SettingTab extends PluginSettingTab {
                 }
                 this.plugin.settings.endMinutes = value;
                 await this.plugin.saveSettings();
-                this.plugin.checkTime();
+                this.plugin.refreshTimeBased();
               })
           );
       } else if (this.plugin.settings.mode === "sun") {
