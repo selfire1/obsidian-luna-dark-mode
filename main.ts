@@ -152,7 +152,6 @@ export default class Luna extends Plugin {
       // SUN MODE
       // ---------------------
 
-      this.fetchSunData();
       this.checkSunData(); // Is the sun data we have for today?
       this.checkSunTime(); // Where is now in comparison to sunset and sunrise?
 
