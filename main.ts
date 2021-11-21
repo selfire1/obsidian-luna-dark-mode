@@ -59,22 +59,13 @@ export default class Luna extends Plugin {
     console.log("Luna Dark Mode Switcher is turned off");
     // this.register(() => clearInterval(timeChecker));
     // clearInterval(timeChecker);
-    // clearInterval(checkSunTimeInterval);
   }
 
   runMode() {
     // Runs different actions based on mode
-    // ---------------------
-    // MANUAL MODE
-    // ---------------------
-    if (this.settings.mode === "manual") {
-      // Passing variables into the checker running every minute
-      this.checkTimePassing();
-
-      // ---------------------
+    if (this.settings.mode === "system") {
       // SYSTEM MODE
-      // ---------------------
-    } else if (this.settings.mode === "system") {
+      console.log("Luna: System Mode");
       // Watch for system changes to color theme
       let media = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -85,28 +76,24 @@ export default class Luna extends Plugin {
           this.updateLightStyle();
         }
       };
+      
       media.addEventListener("change", callback);
-
       // Remove listener when we unload
       this.register(() => media.removeEventListener("change", callback));
       callback();
-    } else if (this.settings.mode === "sun") {
-      console.log("We're in sun mode!");
-      // ---------------------
-      // SUN MODE
-      // ---------------------
 
-      this.checkSunData(); // Is the sun data we have for today? Otherwise, fetch new data
+    } else if (this.settings.mode === "sun" || this.settings.mode === "manual") {
+      // TIME BASED MODES
+      // We're in one of the two time based modes
+
+      if (this.settings.mode === "sun") {
+        // If we're in sun mode, we need to check if the sun data stored in settings is accurate
+        this.checkSunData();
+      }     
+
+      // Either way, we need to initialise checking the time every minute
+      this.refreshTimeBased();
       
-      this.checkTimePassing();
-      
-      this.checkSunTime(); // Where is now in comparison to sunset and sunrise?
-
-      // Check every minute if the sun has set/risen yet!
-      var checkSunTimeInterval = setInterval(() => this.checkSunTime(), 60000);
-
-      // Remove interval on unload
-      this.register(() => clearInterval(checkSunTimeInterval));
     }
   }
 
@@ -175,13 +162,15 @@ export default class Luna extends Plugin {
     }
   }
 
-  checkTimePassing(){
+  refreshTimeBased(){
+    console.log("Luna: Checking time")
     // Declare variables
     let now = new Date();
     let startDark, endDark;
 
     if (this.settings.mode === "manual") {
       // Manual Mode
+      console.log("Luna: Manual mode")
       // In manual mode, dark mode starts at the time it's defined in the settings
       startDark = new Date(
         new Date().setHours(
@@ -196,6 +185,7 @@ export default class Luna extends Plugin {
           );
         } else if (this.settings.mode === "sun") {
           // Sun mode
+          console.log("Luna: Sun Mode")
       // In sun mode, dark mode sarts at sunset
       startDark = new Date(this.settings.sunset);
       // In sun mode, dark mode ends at sunrise
@@ -484,8 +474,8 @@ class SettingTab extends PluginSettingTab {
                 this.plugin.settings.latitude = value;
                 console.log(`Set latitude to ${value}`);
                 await this.plugin.saveSettings();
-                this.plugin.fetchSunData();
-                this.plugin.checkSunTime();
+                this.plugin.fetchSunData(); // Update sun data on change
+                this.plugin.refreshTimeBased(); // Run checking the time
               })
           );
         new Setting(containerEl)
@@ -498,8 +488,8 @@ class SettingTab extends PluginSettingTab {
                 this.plugin.settings.longitude = value;
                 console.log(`Set longitude to ${value}`);
                 await this.plugin.saveSettings();
-                this.plugin.fetchSunData();
-                this.plugin.checkSunTime();
+                this.plugin.fetchSunData(); // Update sun data on change
+                this.plugin.refreshTimeBased(); // Run checking the time
               })
           );
       new Setting(containerEl).addButton((cb) =>
