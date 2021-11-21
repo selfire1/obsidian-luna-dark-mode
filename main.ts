@@ -69,24 +69,7 @@ export default class Luna extends Plugin {
     // ---------------------
     if (this.settings.mode === "manual") {
       // Passing variables into the checker running every minute
-      this.checkTimePassing(
-        // Start of dark mode
-        new Date(
-          new Date().setHours(
-            this.settings.startHours,
-            this.settings.startMinutes,
-            0
-            )
-            ),
-            // End of dark mode
-            new Date(
-          new Date().setHours(
-            this.settings.endHours,
-            this.settings.endMinutes,
-            0
-          )
-        )
-      );
+      this.checkTimePassing();
 
       // ---------------------
       // SYSTEM MODE
@@ -115,10 +98,7 @@ export default class Luna extends Plugin {
 
       this.checkSunData(); // Is the sun data we have for today? Otherwise, fetch new data
       
-      this.checkTimePassing(
-        new Date(this.settings.sunrise),
-        new Date(this.settings.sunset)
-      );
+      this.checkTimePassing();
       
       this.checkSunTime(); // Where is now in comparison to sunset and sunrise?
 
@@ -195,8 +175,32 @@ export default class Luna extends Plugin {
     }
   }
 
-  checkTimePassing(endDark: Date, startDark: Date){
+  checkTimePassing(){
+    // Declare variables
     let now = new Date();
+    let startDark, endDark;
+
+    if (this.settings.mode === "manual") {
+      // Manual Mode
+      // In manual mode, dark mode starts at the time it's defined in the settings
+      startDark = new Date(
+        new Date().setHours(
+          this.settings.startHours,
+          this.settings.startMinutes,
+          0
+          )
+          );
+        // In manual mode, dark mode ends at the time it's defined in the settings
+        endDark = new Date(
+          new Date().setHours(this.settings.endHours, this.settings.endMinutes, 0)
+          );
+        } else if (this.settings.mode === "sun") {
+          // Sun mode
+      // In sun mode, dark mode sarts at sunset
+      startDark = new Date(this.settings.sunset);
+      // In sun mode, dark mode ends at sunrise
+      endDark = new Date(this.settings.sunrise);
+    }
         if (
           // Now is after end of Dark mode
           now.valueOf() > endDark.valueOf() &&
