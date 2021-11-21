@@ -44,11 +44,26 @@ export default class Luna extends Plugin {
     console.log("Luna loaded.");
     // Load settings
     await this.loadSettings();
-
     console.log(this.settings.mode);
-
+    this.runMode();
     this.addSettingTab(new SettingTab(this.app, this));
+  }
 
+  reload() {
+    // Remove Manual mode interval
+    // Whenever a change is made to the settings, run through modes and their actions again
+    this.runMode();
+  }
+
+  onunload() {
+    console.log("Luna Dark Mode Switcher is turned off");
+    // this.register(() => clearInterval(timeChecker));
+    // clearInterval(timeChecker);
+    // clearInterval(checkSunTimeInterval);
+  }
+
+  runMode() {
+    // Runs different actions based on mode
     // ---------------------
     // MANUAL MODE
     // ---------------------
@@ -96,65 +111,6 @@ export default class Luna extends Plugin {
       // Remove interval on unload
       this.register(() => clearInterval(checkSunTimeInterval));
     }
-  }
-
-  reload() {
-    // Whenever a change is made to the settings
-    // Remove Manual mode interval
-    this.register(() => clearInterval(timeChecker));
-
-    // ---------------------
-    // MANUAL MODE
-    // ---------------------
-    if (this.settings.mode === "manual") {
-      // Initial time check
-      this.checkTime();
-      // Watch for time changes (every minute)
-      var timeChecker = setInterval(() => this.checkTime(), 60000);
-
-      // ---------------------
-      // SYSTEM MODE
-      // ---------------------
-    } else if (this.settings.mode === "system") {
-      // Watch for system changes to color theme
-      let media = window.matchMedia("(prefers-color-scheme: dark)");
-
-      let callback = () => {
-        if (media.matches) {
-          this.updateDarkStyle();
-        } else {
-          this.updateLightStyle();
-        }
-      };
-      media.addEventListener("change", callback);
-
-      // Remove listener when we unload
-      this.register(() => media.removeEventListener("change", callback));
-      callback();
-    } else if (this.settings.mode === "sun") {
-      // ---------------------
-      // SUN MODE
-      // ---------------------
-
-      this.checkSunData(); // Is the sun data we have for today?
-      this.checkSunTime(); // Where is now in comparison to sunset and sunrise?
-
-      // Check every minute if the sun has set/risen yet!
-      // var checkSunTimeInterval = setInterval(() => this.checkSunTime(), 60000);
-      console.log("PreInitialised interval");
-      setInterval(() => this.checkSunTime(), 60000);
-      console.log("Initialised interval");
-
-      // Remove interval on unload
-      // this.register(() => clearInterval(checkSunTimeInterval));
-    }
-  }
-
-  onunload() {
-    console.log("Luna Dark Mode Switcher is turned off");
-    // this.register(() => clearInterval(timeChecker));
-    // clearInterval(timeChecker);
-    // clearInterval(checkSunTimeInterval);
   }
 
   checkSunData() {
