@@ -44,9 +44,10 @@ export default class Luna extends Plugin {
     console.log("Luna loaded.");
     // Load settings
     await this.loadSettings();
-    console.log(this.settings.mode);
-    this.runMode();
     this.addSettingTab(new SettingTab(this.app, this));
+    
+    console.log("Luna mode: " + this.settings.mode);
+    this.runMode();
   }
 
   onunload() {
