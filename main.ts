@@ -49,12 +49,6 @@ export default class Luna extends Plugin {
     this.addSettingTab(new SettingTab(this.app, this));
   }
 
-  reload() {
-    // Remove Manual mode interval
-    // Whenever a change is made to the settings, run through modes and their actions again
-    this.runMode();
-  }
-
   onunload() {
     console.log("Luna Dark Mode Switcher is turned off");
     // this.register(() => clearInterval(timeChecker));
@@ -271,7 +265,7 @@ class SettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
             this.display();
             console.log(`Changed mode to ${value}`);
-            this.plugin.reload();
+            this.plugin.runMode(); // After selecting a different mode, initialise it
           });
       });
 
