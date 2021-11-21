@@ -45,7 +45,7 @@ export default class Luna extends Plugin {
     // Load settings
     await this.loadSettings();
     this.addSettingTab(new SettingTab(this.app, this));
-    
+
     console.log("Luna mode: " + this.settings.mode);
     this.runMode();
   }
@@ -86,8 +86,11 @@ export default class Luna extends Plugin {
         this.checkSunData();
       }     
 
-      // Either way, we need to initialise checking the time every minute
+      // Whether in sun or manual mode, we need to initialise checking the time every minute
+      // Run the function first now
       this.refreshTimeBased();
+      // Initialize interval
+      const timeCheckerInterval = setInterval(() => this.refreshTimeBased(), 60000);
       
     }
   }
