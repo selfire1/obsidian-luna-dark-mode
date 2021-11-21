@@ -205,27 +205,6 @@ export default class Luna extends Plugin {
         }
   }
 
-  checkSunTime() {
-    console.log("Checking sun time");
-    //  Load times
-    let sunriseUTC = new Date(this.settings.sunrise);
-    let sunsetUTC = new Date(this.settings.sunset);
-    let now = new Date();
-
-    if (
-      // Now is after sunrise
-      now.valueOf() > sunriseUTC.valueOf() &&
-      // and now is before sunset
-      now.valueOf() < sunsetUTC.valueOf()
-    ) {
-      // Therefore we want light mode
-      this.updateLightStyle();
-    } else {
-      // All other times we want dark mode
-      this.updateDarkStyle();
-    }
-  }
-
   checkTime() {
     //  Load times
     let startDark = new Date(
