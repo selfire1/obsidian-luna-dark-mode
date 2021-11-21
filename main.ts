@@ -293,18 +293,12 @@ checkSunTime() {
 
   updateDarkStyle() {
     // @ts-ignore
-    this.app.setTheme("obsidian");
-    // @ts-ignore
-    this.app.vault.setConfig("theme", "obsidian");
-    this.app.workspace.trigger("css-change");
+    this.app.changeTheme("obsidian");
   }
 
   updateLightStyle() {
     // @ts-ignore
-    this.app.setTheme("moonstone");
-    // @ts-ignore
-    this.app.vault.setConfig("theme", "moonstone");
-    this.app.workspace.trigger("css-change");
+    this.app.changeTheme("moonstone");
   }
 }
 
