@@ -205,39 +205,6 @@ export default class Luna extends Plugin {
         }
   }
 
-  checkTime() {
-    //  Load times
-    let startDark = new Date(
-      new Date().setHours(
-        this.settings.startHours,
-        this.settings.startMinutes,
-        0
-      )
-    );
-    let endDark = new Date(
-      new Date().setHours(this.settings.endHours, this.settings.endMinutes, 0)
-    );
-    let now = new Date();
-    console.log("Luna: Checking time…");
-
-    if (
-      // Now is after end of Dark mode
-      now.valueOf() > endDark.valueOf() &&
-      // and now is before start of Dark mode
-      now.valueOf() < startDark.valueOf()
-    ) {
-      // Therefore we want light mode
-      this.updateLightStyle();
-    } else {
-      // All other times we want dark mode
-      this.updateDarkStyle();
-    }
-
-    console.log(
-      `It is ${now.getHours()}:${now.getMinutes()}. Dark Mode starts ${startDark.getHours()}:${startDark.getMinutes()}. It ends ${endDark.getHours()}:${endDark.getMinutes()}`
-    );
-  }
-
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
   }
