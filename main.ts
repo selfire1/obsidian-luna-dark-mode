@@ -89,9 +89,21 @@ export default class Luna extends Plugin {
       // Whether in sun or manual mode, we need to initialise checking the time every minute
       // Run the function first now
       this.refreshTimeBased();
-      // Initialize interval
-      const timeCheckerInterval = setInterval(() => this.refreshTimeBased(), 60000);
       
+      // Initialize interval
+      this.startInterval(true);
+    }
+  }
+  
+  startInterval(start: boolean) {
+    let timeCheckInterval
+    if (start) {
+      clearInterval(timeCheckInterval);
+      console.log("Luna: Time Interval started")
+      timeCheckInterval = setInterval(() => this.refreshTimeBased(), 60000);
+    } else if (!start) {
+      console.log("Luna: Time Interval stopped")
+      clearInterval(timeCheckInterval);
     }
   }
 
