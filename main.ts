@@ -98,12 +98,16 @@ export default class Luna extends Plugin {
   startInterval(start: boolean) {
     let timeCheckInterval
     if (start) {
+      // Start by clearing interval, so multiple aren't set
       clearInterval(timeCheckInterval);
-      console.log("Luna: Time Interval started")
+
+      // Start interval
       timeCheckInterval = setInterval(() => this.refreshTimeBased(), 60000);
+      console.log("Luna: Time Interval started")
     } else if (!start) {
-      console.log("Luna: Time Interval stopped")
+      // Clear interval
       clearInterval(timeCheckInterval);
+      console.log("Luna: Time Interval stopped")
     }
   }
 
