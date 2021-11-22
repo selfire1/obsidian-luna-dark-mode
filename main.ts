@@ -219,14 +219,6 @@ export default class Luna extends Plugin {
         }
   }
 
-  async loadSettings() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-  }
-
-  async saveSettings() {
-    await this.saveData(this.settings);
-  }
-
   refreshSystemTheme() {
     const isDarkMode =
       window.matchMedia &&
@@ -250,7 +242,16 @@ export default class Luna extends Plugin {
     // @ts-ignore
     this.app.changeTheme("moonstone");
   }
+  
+  async loadSettings() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  }
+  
+  async saveSettings() {
+    await this.saveData(this.settings);
+  }
 }
+
 
 // Settings
 class SettingTab extends PluginSettingTab {
