@@ -41,33 +41,29 @@ export default class Luna extends Plugin {
   settings: MyPluginSettings;
 
   async onload() {
-    console.log("Luna loaded.")
+    console.log("Luna loaded.");
     // Load settings
     await this.loadSettings();
-
-    console.log(this.settings.mode);
-
     this.addSettingTab(new SettingTab(this.app, this));
 
-    // ---------------------
-    // MANUAL MODE
-    // ---------------------
-    if (this.settings.mode === "manual") {
-      // Initial time check
-      this.checkTime();
-      // Watch for time changes (every minute)
-      const timeChecker = setInterval(() => this.checkTime(), 60000);
-      
-      // Remove interval when we unload
-      this.register(() => clearInterval(timeChecker));
-      
-      // ---------------------
+    console.log("Luna mode: " + this.settings.mode);
+    this.runMode();
+  }
+
+  onunload() {
+    this.startTimeInterval(false);
+    console.log("Luna Dark Mode Switcher unloaded");
+    
+  }
+
+  runMode() {
+    // Runs different actions based on mode
+    if (this.settings.mode === "system") {
       // SYSTEM MODE
-      // ---------------------
-    } else if (this.settings.mode === "system") {
+      console.log("Luna: System Mode");
       // Watch for system changes to color theme
       let media = window.matchMedia("(prefers-color-scheme: dark)");
-      
+
       let callback = () => {
         if (media.matches) {
           this.updateDarkStyle();
@@ -75,32 +71,49 @@ export default class Luna extends Plugin {
           this.updateLightStyle();
         }
       };
-      media.addEventListener("change", callback);
       
+      media.addEventListener("change", callback);
       // Remove listener when we unload
       this.register(() => media.removeEventListener("change", callback));
       callback();
-    } else if (this.settings.mode === "sun") {
-      console.log("We're in sun mode!")
-      // ---------------------
-      // SUN MODE
-      // ---------------------
+
+    } else if (this.settings.mode === "sun" || this.settings.mode === "manual") {
+      // TIME BASED MODES
+      // We're in one of the two time based modes
+
+      if (this.settings.mode === "sun") {
+        // If we're in sun mode, we need to check if the sun data stored in settings is accurate
+        this.checkSunData();
+      }     
+
+      // Whether in sun or manual mode, we need to initialise checking the time every minute
+      // Run the function first now
+      this.refreshTimeBased();
       
-      // this.fetchSunData(); Unnecessary
-      this.checkSunData(); // Is the sun data we have for today?
-      this.checkSunTime(); // Where is now in comparison to sunset and sunrise?
+      // Initialize interval of above function
+      this.startTimeInterval(true);
+    }
+  }
+  
+  startTimeInterval(start: boolean) {
+    let timeCheckInterval
+    if (start) {
+      // Start by clearing interval, so multiple aren't set
+      clearInterval(timeCheckInterval);
 
-      // Check every minute if the sun has set/risen yet!
-      var checkSunTimeInterval = setInterval(() => this.checkSunTime(), 60000);
-
-      // Remove interval on unload
-      this.register(() => clearInterval(checkSunTimeInterval));
+      // Start interval
+      timeCheckInterval = setInterval(() => this.refreshTimeBased(), 60000);
+      console.log("Luna: Time Interval started")
+    } else if (!start) {
+      // Clear interval
+      clearInterval(timeCheckInterval);
+      console.log("Luna: Time Interval stopped")
     }
   }
 
   checkSunData() {
     // This function checks if the data for sunrise/sunset in the settings is for today. Otherwise it triggers a function to fetch new data.
-    console.log("Checking sun time in relation to now!")
+    console.log("Checking sun time in relation to now!");
     // By .setHours(0, 0, 0, 0) all time is set to 0, only the date gets compared
     const sunriseDate = new Date(this.settings.sunrise).setHours(0, 0, 0, 0);
     const sunsetDate = new Date(this.settings.sunset).setHours(0, 0, 0, 0);
@@ -109,90 +122,16 @@ export default class Luna extends Plugin {
       // The data for the sun is old → We need to fetch new data
       this.fetchSunData();
     } else {
-      console.log("Sun data is accurate")
-    }
-
-  }
-
-
-  reload() { // Whenever a change is made to the settings
-    // Remove Manual mode interval
-    this.register(() => clearInterval(timeChecker));
-
-    // ---------------------
-    // MANUAL MODE
-    // ---------------------
-    if (this.settings.mode === "manual") {
-      // Initial time check
-      this.checkTime();
-      // Watch for time changes (every minute)
-      var timeChecker = setInterval(() => this.checkTime(), 60000);
-
-      // ---------------------
-      // SYSTEM MODE
-      // ---------------------
-    } else if (this.settings.mode === "system") {
-      // Watch for system changes to color theme
-      let media = window.matchMedia("(prefers-color-scheme: dark)");
-
-      let callback = () => {
-        if (media.matches) {
-          this.updateDarkStyle();
-        } else {
-          this.updateLightStyle();
-        }
-      };
-      media.addEventListener("change", callback);
-
-      // Remove listener when we unload
-      this.register(() => media.removeEventListener("change", callback));
-      callback();
-    } else if (this.settings.mode === "sun") {
-      // ---------------------
-      // SUN MODE
-      // ---------------------
-
-      this.checkSunData(); // Is the sun data we have for today?
-      this.checkSunTime(); // Where is now in comparison to sunset and sunrise?
-
-      // Check every minute if the sun has set/risen yet!
-      // var checkSunTimeInterval = setInterval(() => this.checkSunTime(), 60000);
-      console.log("PreInitialised interval")
-      setInterval(() => this.checkSunTime(), 60000);
-      console.log("Initialised interval")
-
-      // Remove interval on unload
-      // this.register(() => clearInterval(checkSunTimeInterval));
+      console.log("Sun data is accurate");
     }
   }
-
-checkSunTime() {
-  console.log("Checking sun time")
-  //  Load times
-  let sunriseUTC = new Date(this.settings.sunrise);
-  let sunsetUTC = new Date(this.settings.sunset);
-  let now = new Date();
-
-  if (
-    // Now is after sunrise
-    now.valueOf() > sunriseUTC.valueOf() &&
-    // and now is before sunset
-    now.valueOf() < sunsetUTC.valueOf()
-  ) {
-    // Therefore we want light mode
-    this.updateLightStyle();
-  } else {
-    // All other times we want dark mode
-    this.updateDarkStyle();
-  }
-}
 
   async fetchSunData() {
     console.log("Fetching sunset and sunrise…");
     const url = `https://api.sunrise-sunset.org/json?lat=${this.settings.latitude}&lng=${this.settings.longitude}&formatted=0`;
 
     let response = await fetch(url);
-    
+
     if (response.ok) {
       // if HTTP-status is 200-299
       let json = await response.json();
@@ -204,7 +143,7 @@ checkSunTime() {
       // Save sunrise and sunset as a Date
       this.settings.sunrise = new Date(myResponse.results.sunrise);
       this.settings.sunset = new Date(myResponse.results.sunset);
-      
+
       //  Load times
       let sunriseUTC = new Date(myResponse.results.sunrise);
       let sunsetUTC = new Date(myResponse.results.sunset);
@@ -231,50 +170,53 @@ checkSunTime() {
       // Concatenate strings for display
       this.settings.sunsetTime = numArr[0] + ":" + numArr[1];
       this.settings.sunriseTime = numArr[2] + ":" + numArr[3];
-      await this.saveSettings()
+      await this.saveSettings();
     } else {
       new Notice("Luna: Error fetching data. " + response.status);
     }
-  };
-
-  async loadSettings() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
   }
 
-  async saveSettings() {
-    await this.saveData(this.settings);
-  }
+  refreshTimeBased(){
+    console.log("Luna: Checking time")
+    // Declare variables
+    let now = new Date();
+    let startDark, endDark;
 
-  checkTime() {
-    //  Load times
-    let startDark = new Date(new Date().setHours(this.settings.startHours, this.settings.startMinutes, 0));
-    let endDark = new Date(new Date().setHours(this.settings.endHours, this.settings.endMinutes, 0));
-    let now = new Date;
-    console.log("Luna: Checking time…");
-
-    if (
-      // Now is after end of Dark mode
-      now.valueOf() > endDark.valueOf() &&
-      // and now is before start of Dark mode
-      now.valueOf() < startDark.valueOf()
-    ) {
-      // Therefore we want light mode
-      this.updateLightStyle();
-    } else {
-      // All other times we want dark mode
-      this.updateDarkStyle();
+    if (this.settings.mode === "manual") {
+      // Manual Mode
+      console.log("Luna: Manual mode")
+      // In manual mode, dark mode starts at the time it's defined in the settings
+      startDark = new Date(
+        new Date().setHours(
+          this.settings.startHours,
+          this.settings.startMinutes,
+          0
+          )
+          );
+        // In manual mode, dark mode ends at the time it's defined in the settings
+        endDark = new Date(
+          new Date().setHours(this.settings.endHours, this.settings.endMinutes, 0)
+          );
+        } else if (this.settings.mode === "sun") {
+          // Sun mode
+          console.log("Luna: Sun Mode")
+      // In sun mode, dark mode sarts at sunset
+      startDark = new Date(this.settings.sunset);
+      // In sun mode, dark mode ends at sunrise
+      endDark = new Date(this.settings.sunrise);
     }
-
-    console.log(
-      `It is ${now.getHours()}:${now.getMinutes()}. Dark Mode starts ${startDark.getHours()}:${startDark.getMinutes()}. It ends ${endDark.getHours()}:${endDark.getMinutes()}`
-    );
-  }
-
-  onunload() {
-    console.log("Luna Dark Mode Switcher is turned off");
-    // this.register(() => clearInterval(timeChecker));
-    // clearInterval(timeChecker);
-    // clearInterval(checkSunTimeInterval);
+        if (
+          // Now is after end of Dark mode
+          now.valueOf() > endDark.valueOf() &&
+          // and now is before start of Dark mode
+          now.valueOf() < startDark.valueOf()
+        ) {
+          // Therefore we want light mode
+          this.updateLightStyle();
+        } else {
+          // All other times we want dark mode
+          this.updateDarkStyle();
+        }
   }
 
   refreshSystemTheme() {
@@ -293,20 +235,23 @@ checkSunTime() {
 
   updateDarkStyle() {
     // @ts-ignore
-    this.app.setTheme("obsidian");
-    // @ts-ignore
-    this.app.vault.setConfig("theme", "obsidian");
-    this.app.workspace.trigger("css-change");
+    this.app.changeTheme("obsidian");
   }
 
   updateLightStyle() {
     // @ts-ignore
-    this.app.setTheme("moonstone");
-    // @ts-ignore
-    this.app.vault.setConfig("theme", "moonstone");
-    this.app.workspace.trigger("css-change");
+    this.app.changeTheme("moonstone");
+  }
+  
+  async loadSettings() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  }
+  
+  async saveSettings() {
+    await this.saveData(this.settings);
   }
 }
+
 
 // Settings
 class SettingTab extends PluginSettingTab {
@@ -341,7 +286,7 @@ class SettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
             this.display();
             console.log(`Changed mode to ${value}`);
-            this.plugin.reload();
+            this.plugin.runMode(); // After selecting a different mode, initialise it
           });
       });
 
@@ -384,7 +329,7 @@ class SettingTab extends PluginSettingTab {
                           );
                         }
                 await this.plugin.saveSettings();
-                this.plugin.checkTime();
+                this.plugin.refreshTimeBased();
               })
           );
         const startMins = new Setting(containerEl)
@@ -412,7 +357,7 @@ class SettingTab extends PluginSettingTab {
                 }
                 this.plugin.settings.startMinutes = value;
                 await this.plugin.saveSettings();
-                this.plugin.checkTime();
+                this.plugin.refreshTimeBased();
               }
               )
           );
@@ -443,7 +388,7 @@ class SettingTab extends PluginSettingTab {
                           `Ending: ${value}:${this.plugin.settings.endMinutes}`
                           );
                     await this.plugin.saveSettings();
-                    this.plugin.checkTime();
+                    this.plugin.refreshTimeBased();
                 }
               })
           );
@@ -472,7 +417,7 @@ class SettingTab extends PluginSettingTab {
                 }
                 this.plugin.settings.endMinutes = value;
                 await this.plugin.saveSettings();
-                this.plugin.checkTime();
+                this.plugin.refreshTimeBased();
               })
           );
       } else if (this.plugin.settings.mode === "sun") {
@@ -490,8 +435,8 @@ class SettingTab extends PluginSettingTab {
                 this.plugin.settings.latitude = value;
                 console.log(`Set latitude to ${value}`);
                 await this.plugin.saveSettings();
-                this.plugin.fetchSunData();
-                this.plugin.checkSunTime();
+                this.plugin.fetchSunData(); // Update sun data on change
+                this.plugin.refreshTimeBased(); // Run checking the time
               })
           );
         new Setting(containerEl)
@@ -504,8 +449,8 @@ class SettingTab extends PluginSettingTab {
                 this.plugin.settings.longitude = value;
                 console.log(`Set longitude to ${value}`);
                 await this.plugin.saveSettings();
-                this.plugin.fetchSunData();
-                this.plugin.checkSunTime();
+                this.plugin.fetchSunData(); // Update sun data on change
+                this.plugin.refreshTimeBased(); // Run checking the time
               })
           );
       new Setting(containerEl).addButton((cb) =>

@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.1.4](https://github.com/selfire1/obsidian-luna-dark-mode/compare/0.1.3...0.1.4) (2021-11-22)
+
+
+### Bug Fixes
+
+* 🐛 Implement new interval to correctly unload ([60c639e](https://github.com/selfire1/obsidian-luna-dark-mode/commit/60c639e3e0ec60fcc9805dc256e380903a5fff5f))
+
 ### [0.1.3](https://github.com/selfire1/obsidian-luna-dark-mode/compare/0.1.2...0.1.3) (2021-11-09)
 
 
