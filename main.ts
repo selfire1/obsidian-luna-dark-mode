@@ -177,14 +177,14 @@ export default class Luna extends Plugin {
   }
 
   refreshTimeBased(){
-    console.log("Luna: Checking time")
+    console.log("Luna: Checking time…")
     // Declare variables
     let now = new Date();
     let startDark, endDark;
 
     if (this.settings.mode === "manual") {
       // Manual Mode
-      console.log("Luna: Manual mode")
+      console.log("Luna: In Manual mode")
       // In manual mode, dark mode starts at the time it's defined in the settings
       startDark = new Date(
         new Date().setHours(
@@ -199,7 +199,7 @@ export default class Luna extends Plugin {
           );
         } else if (this.settings.mode === "sun") {
           // Sun mode
-          console.log("Luna: Sun Mode")
+          console.log("Luna: In Sun Mode")
       // In sun mode, dark mode sarts at sunset
       startDark = new Date(this.settings.sunset);
       // In sun mode, dark mode ends at sunrise
