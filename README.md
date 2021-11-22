@@ -1,7 +1,7 @@
 # Luna: Dark Mode Switcher 🌝
 A plugin for [Obsidian](https://obsidian.md/) based on [kepano/obsidian-system-dark-mode](https://github.com/kepano/obsidian-system-dark-mode).
 
-<img src="https://github.com/selfire1/obsidian-luna-dark-mode/blob/master/images/settings.png?raw=true" width="800" />
+<img src="https://github.com/selfire1/obsidian-luna-dark-mode/blob/main/images/settings.png?raw=true" width="800" />
 
 > 🚧 Status: Available through [BRAT](https://github.com/TfTHacker/obsidian42-brat).
 
