@@ -51,9 +51,9 @@ export default class Luna extends Plugin {
   }
 
   onunload() {
-    console.log("Luna Dark Mode Switcher is turned off");
-    // this.register(() => clearInterval(timeChecker));
-    // clearInterval(timeChecker);
+    this.startTimeInterval(false);
+    console.log("Luna Dark Mode Switcher unloaded");
+    
   }
 
   runMode() {
@@ -90,12 +90,12 @@ export default class Luna extends Plugin {
       // Run the function first now
       this.refreshTimeBased();
       
-      // Initialize interval
-      this.startInterval(true);
+      // Initialize interval of above function
+      this.startTimeInterval(true);
     }
   }
   
-  startInterval(start: boolean) {
+  startTimeInterval(start: boolean) {
     let timeCheckInterval
     if (start) {
       // Start by clearing interval, so multiple aren't set
