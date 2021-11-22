@@ -1,14 +1,11 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
-
 ### [0.1.4](https://github.com/selfire1/obsidian-luna-dark-mode/compare/0.1.3...0.1.4) (2021-11-22)
 
 
 ### Bug Fixes
 
-* 🐛 Implement new interval ([60c639e](https://github.com/selfire1/obsidian-luna-dark-mode/commit/60c639e3e0ec60fcc9805dc256e380903a5fff5f))
-* 🐛 Move Interval into it's own function ([4798836](https://github.com/selfire1/obsidian-luna-dark-mode/commit/479883658e2b828448daf0aa3e89b2104bebdf3a))
+* 🐛 Implement new interval to correctly unload ([60c639e](https://github.com/selfire1/obsidian-luna-dark-mode/commit/60c639e3e0ec60fcc9805dc256e380903a5fff5f))
 
 ### [0.1.3](https://github.com/selfire1/obsidian-luna-dark-mode/compare/0.1.2...0.1.3) (2021-11-09)
 
